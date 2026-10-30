@@ -65,7 +65,7 @@ SCENES = [
         ],
     ),
     dict(  # product label over the front of the bottle
-        src="D", t_in=7.6, t_out=12.4, speed=1.2, flash=True,
+        src="D", t_in=7.6, t_out=12.4, speed=1.2, flash=True, text_top=0.115,
         lines=[
             ("D'Aura Aromatic", 0.1, "name"),
             ("Virgin Coconut Oil", 0.7, "name"),
@@ -302,7 +302,7 @@ class Overlay:
         self.items = []
         self.sparkle_big = star(round(46 * kit.scale), (255, 244, 200))
         self.sparkle_small = star(round(28 * kit.scale))
-        y = TEXT_TOP * H
+        y = scene.get("text_top", TEXT_TOP) * H
         names = [i for i, l in enumerate(scene["lines"]) if l[2] == "name"]
         for i, (text, t0, kind) in enumerate(scene["lines"]):
             if kind == "name":
