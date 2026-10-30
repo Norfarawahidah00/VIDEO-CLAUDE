@@ -54,32 +54,38 @@ CLIPS = {
 # "Harga pun murah 😍"). No packaging in the footage, so no label claims.
 # ---------------------------------------------------------------------------
 SCENES = [
-    dict(  # HOOK 1/2 - fabric spread towards the camera (texture)
-        src="F", t_in=4.2, t_out=6.6, speed=1.5,
+    dict(  # HOOK 1/2 - cover being opened out (same shot as hook 2)
+        src="O", t_in=2.6, t_out=5.0, speed=1.6,
         lines=[
             ("Ibu susah nak menyusu", 0.03, "text"),
             ("dekat luar? 😩", 0.03, "text"),
         ],
     ),
     dict(  # HOOK 2/2 - whole cover held open
-        src="O", t_in=4.0, t_out=6.4, speed=1.6,
+        src="O", t_in=5.0, t_out=7.4, speed=1.6,
         lines=[
             ("Nursing cover ni", 0.03, "text"),
             ("WAJIB ada! 🛒✨", 0.03, "text"),
         ],
     ),
     dict(  # product name over the front view of the cover being worn
-        src="O", t_in=25.5, t_out=29.5, speed=1.1, flash=True, text_top=0.15,
+        src="O", t_in=25.5, t_out=29.5, speed=1.1, flash=True, text_top=0.11,
         lines=[
-            ("Nursing Cover", 0.1, "name"),
+            ("Dhia Nursing Cover", 0.1, "name"),
+            ("Multipurpose Use", 1.1, "sub"),
         ],
     ),
-    dict(  # fabric close-up, baby beside
-        src="F", t_in=7.0, t_out=12.0, speed=1.3,
+    dict(  # fabric close-up (crepe texture)
+        src="S3", t_in=4.9, t_out=7.3, speed=1.0,
         lines=[
             ("Material sejuk & kain selesa", 0.08, "text"),
-            ("Tak panas, baby pun", 1.4, "text"),
-            ("selesa nak menyusu 🥰", 1.4, "text"),
+        ],
+    ),
+    dict(  # cover held up beside the sleeping baby
+        src="F", t_in=12.0, t_out=15.6, speed=1.2,
+        lines=[
+            ("Tak panas, baby pun", 0.08, "text"),
+            ("selesa nak menyusu 🥰", 0.08, "text"),
         ],
     ),
     dict(  # turns around: back and sides
@@ -90,7 +96,7 @@ SCENES = [
         ],
     ),
     dict(  # seated, cover reaches the floor all round
-        src="S2", t_in=4.5, t_out=8.5, speed=1.2,
+        src="S2", t_in=4.0, t_out=7.6, speed=1.2,
         lines=[
             ("Nak menyusu baby kat public", 0.08, "text"),
             ("pun rasa secure 🤱", 0.08, "text"),
@@ -102,32 +108,32 @@ SCENES = [
             ("Ada zip bahagian depan ✅", 0.1, "check"),
         ],
     ),
-    dict(  # hand lifts the front to peek in
-        src="S3", t_in=2.0, t_out=5.2, speed=1.1,
+    dict(  # mum looks down at the baby through the top of the cover
+        src="S1", t_in=2.0, t_out=4.8, speed=1.0,
         lines=[
             ("Senang nak intai anak 👀✅", 0.08, "check"),
         ],
     ),
-    dict(  # recap list - front view, zipped
-        src="O", t_in=57.5, t_out=62.3, speed=1.1,
+    dict(  # recap list - seated, front view
+        src="S2", t_in=7.6, t_out=10.9, speed=1.0,
         lines=[
             ("Senang cerita 💕", 0.05, "text"),
-            ("✅ Selesa & tak panas", 0.6, "check"),
-            ("✅ Kain labuh 4 penjuru", 1.2, "check"),
-            ("✅ Zip depan, boleh intai anak", 1.8, "check"),
-            ("✅ Secure menyusu kat public", 2.4, "check"),
+            ("✅ Selesa & tak panas", 0.45, "check"),
+            ("✅ Kain labuh 4 penjuru", 0.85, "check"),
+            ("✅ Zip depan, boleh intai anak", 1.25, "check"),
+            ("✅ Secure menyusu kat public", 1.65, "check"),
         ],
     ),
-    dict(  # CTA 1/2 - seated, face to camera
-        src="S1", t_in=7.5, t_out=12.5, speed=1.3,
+    dict(  # CTA 1/2 - zipping up the front
+        src="O", t_in=51.0, t_out=55.0, speed=1.1,
         lines=[
             ("Jangan tunggu baby meragam", 0.08, "text"),
             ("kat luar baru nak cari 😭", 0.08, "text"),
         ],
         sfx=[(0.0, "whoosh", 0.5)],
     ),
-    dict(  # CTA 2/2, text only - wearing it, front and side
-        src="O", t_in=62.3, t_out=67.0, speed=1.15,
+    dict(  # CTA 2/2, text only - wearing it, front view
+        src="O", t_in=57.5, t_out=62.0, speed=1.1,
         lines=[
             ("Harga pun murah 😍", 0.08, "text"),
             ("Tekan beg kuning &", 1.0, "cta"),
@@ -138,8 +144,8 @@ SCENES = [
 ]
 
 # layout (fractions of the 1080x1920 frame; scaled for preview)
-TEXT_TOP = 0.185          # block starts ~18.5% from top
-TEXT_SIZE = 60            # Fredoka px at 1080 wide (max; one size for all lines)
+TEXT_TOP = 0.155          # block starts ~15.5% from top
+TEXT_SIZE = 50            # Fredoka px at 1080 wide (max; one size for all lines)
 NAME_SIZE = 124           # Pacifico px at 1080 wide (max; one size for all rows)
 MAX_TEXT_W = 0.88         # longest line must fit within 88% of the width
 LINE_GAP = 1.06           # tight line spacing
@@ -434,13 +440,14 @@ def build_sfx_events(scenes_meta):
         for t, name, g in sc.get("sfx", []):
             ev.append((start + t, name, g, 0.0))
         seen_t = set()
+        has_sub = any(i["kind"] == "sub" for i in ov.items)
         for it in ov.items:
             t = start + it["t0"]
             if it["kind"] == "name":
                 if it["first"]:
                     ev.append((t, "whoosh", 0.45, -0.2))
                 ev.append((t + 0.15, "pen", 0.55, 0.1))
-                if it["last"]:
+                if it["last"] and not has_sub:
                     ev.append((t + 0.85, "shimmer", 0.55, 0.0))
                     ev.append((t + 0.95, "sparkle", 0.35, 0.3))
                 continue
