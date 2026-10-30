@@ -53,9 +53,12 @@ CLIPS = {
 # "Material sejuk ...", "Nak menyusu tempat public ...", "Ada zip ✅",
 # "Harga pun murah 😍"). No packaging in the footage, so no label claims.
 # ---------------------------------------------------------------------------
+# standing (office) shots are framed a little tighter on the person
+ZOOM_STANDING = 1.25
+
 SCENES = [
     dict(  # HOOK 1/2 - cover being opened out (same shot as hook 2)
-        src="O", t_in=2.6, t_out=5.0, speed=1.6,
+        src="O", t_in=2.6, t_out=5.0, speed=1.6, zoom=ZOOM_STANDING, cx=0.5, cy=0.54,
         lines=[
             ("Ibu susah nak menyusu", 0.03, "text"),
             ("dekat luar? 😩", 0.03, "text"),
@@ -69,7 +72,7 @@ SCENES = [
         ],
     ),
     dict(  # product name over the front view of the cover being worn
-        src="O", t_in=25.5, t_out=29.5, speed=1.1, flash=True, text_top=0.11,
+        src="O", t_in=25.5, t_out=29.5, speed=1.1, zoom=ZOOM_STANDING, cx=0.5, cy=0.54, flash=True, text_top=0.11,
         lines=[
             ("Dhia Nursing Cover", 0.1, "name"),
             ("Multipurpose Use", 1.1, "sub"),
@@ -89,7 +92,7 @@ SCENES = [
         ],
     ),
     dict(  # turns around: back and sides
-        src="O", t_in=35.0, t_out=45.0, speed=2.5,
+        src="O", t_in=35.0, t_out=45.0, speed=2.5, zoom=ZOOM_STANDING, cx=0.5, cy=0.54,
         lines=[
             ("Kain labuh depan, belakang,", 0.08, "text"),
             ("kiri & kanan 😍", 0.08, "text"),
@@ -125,7 +128,7 @@ SCENES = [
         ],
     ),
     dict(  # CTA 1/2 - posing, turning side to front
-        src="O", t_in=45.5, t_out=49.8, speed=1.15,
+        src="O", t_in=45.5, t_out=49.8, speed=1.15, zoom=ZOOM_STANDING, cx=0.5, cy=0.54,
         lines=[
             ("Jangan tunggu baby meragam", 0.08, "text"),
             ("kat luar baru nak cari 😭", 0.08, "text"),
@@ -133,7 +136,7 @@ SCENES = [
         sfx=[(0.0, "whoosh", 0.5)],
     ),
     dict(  # CTA 2/2, text only - posing front, turn and swish
-        src="O", t_in=62.5, t_out=67.0, speed=1.1,
+        src="O", t_in=62.5, t_out=67.0, speed=1.1, zoom=ZOOM_STANDING, cx=0.5, cy=0.54,
         lines=[
             ("Harga pun murah 😍", 0.08, "text"),
             ("Tekan beg kuning &", 1.0, "cta"),
