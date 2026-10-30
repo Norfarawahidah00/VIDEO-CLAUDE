@@ -1,0 +1,476 @@
+#!/usr/bin/env python3
+"""TikTok edit for D'AURA AVCO Aromatic Virgin Coconut Oil (Morning Dew).
+
+Renders straight from the original 4K phone clips:
+  python3 avco_edit.py --src "<folder with raw clips>" --out preview.mp4 --preview
+  python3 avco_edit.py --src "<folder with raw clips>" --out final.mp4
+
+- 1080x1920 @ 30 fps (preview: 540x960), original colours, original audio removed
+- text in the reference style (white, centred, ~18-25% from top, thin dark outline)
+- synthesised SFX only, no music
+"""
+import argparse
+import math
+import os
+import re
+import subprocess
+import sys
+import tempfile
+
+import numpy as np
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import sfx  # noqa: E402
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+FPS = 30
+FONT_TEXT = os.path.join(HERE, "fonts", "Fredoka-SemiBold.ttf")
+FONT_NAME = os.path.join(HERE, "fonts", "Pacifico-Regular.ttf")
+FONT_EMOJI = "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf"
+
+BRAND_PURPLE = (108, 84, 214)  # violet of the AVCO label
+OUTLINE = (25, 20, 35)
+
+# Source clips (all 3840x2160 HEVC; A/D are portrait, B/C landscape after autorotate)
+CLIPS = {
+    "A": "VID20260908154605.mp4",  # front + back label, pump
+    "B": "VID20260908154728.mp4",  # oil swatch on back of hand (landscape)
+    "C": "VID20260908154758.mp4",  # oil rubbed in, glossy hand (landscape)
+    "D": "VID20260908155004.mp4",  # front label, different angles
+}
+
+# ---------------------------------------------------------------------------
+# Edit decision list. Times are seconds in the source clip; text times are
+# seconds from the start of the scene. cx = horizontal crop centre (0..1) for
+# landscape clips. Every scene is < 5 s.
+# Wording only uses claims printed on the packaging:
+#   front: Aromatic Virgin Coconut Oil, Morning Dew, Rich in Antioxidant & Vitamin E
+#   back:  Moisturize, nourish and soften skin & hair; natural make-up remover;
+#          suitable for the entire family; >99% pure virgin coconut oil;
+#          <1% natural plant extract fragrance; cold press process; 100% natural
+# ---------------------------------------------------------------------------
+SCENES = [
+    dict(  # HOOK on the best texture shot
+        src="B", t_in=2.6, t_out=6.2, speed=1.2, cx=0.56,
+        lines=[
+            ("Kulit & rambut kering", 0.05, "text"),
+            ("tak bermaya? 😩", 0.05, "text"),
+            ("Minyak kelapa dara ni", 1.25, "text"),
+            ("WAJIB ada! 🛒✨", 1.25, "text"),
+        ],
+    ),
+    dict(  # product name over the front label
+        src="D", t_in=7.6, t_out=11.6, speed=1.2, flash=True,
+        lines=[
+            ("AVCO Morning Dew", 0.12, "name"),
+            ("Aromatic Virgin Coconut Oil 🥥", 1.35, "text"),
+        ],
+    ),
+    dict(
+        src="A", t_in=10.0, t_out=15.5, speed=1.4,
+        lines=[
+            ("Kaya dengan Antioxidant", 0.1, "text"),
+            ("& Vitamin E 🌿", 0.1, "text"),
+        ],
+        sfx=[(0.12, "ding", 0.5)],
+    ),
+    dict(  # back label: multi function
+        src="A", t_in=17.5, t_out=26.5, speed=2.0,
+        lines=[
+            ("Multi fungsi! 💜", 0.05, "text"),
+            ("✅ Lembap & lembutkan kulit", 0.75, "check"),
+            ("✅ Nutrisi & lembutkan rambut", 1.45, "check"),
+            ("✅ Pembersih make-up semulajadi", 2.15, "check"),
+        ],
+    ),
+    dict(  # glossy hand
+        src="C", t_in=0.0, t_out=6.0, speed=1.5, cx=0.42,
+        lines=[
+            ("Sapu sikit je, kulit nampak", 0.1, "text"),
+            ("lembap & glowing ✨", 0.1, "text"),
+        ],
+    ),
+    dict(  # back label, second angle with badges
+        src="A", t_in=35.0, t_out=40.5, speed=1.5,
+        lines=[
+            ("✅ >99% minyak kelapa dara tulen", 0.1, "check"),
+            ("✅ Proses cold press", 0.8, "check"),
+            ("✅ 100% natural", 1.5, "check"),
+        ],
+    ),
+    dict(  # pump
+        src="A", t_in=48.5, t_out=53.5, speed=2.0,
+        lines=[("Botol pam, senang guna! 👌", 0.08, "text")],
+    ),
+    dict(  # swatch, second moment
+        src="B", t_in=8.0, t_out=12.0, speed=1.3, cx=0.55,
+        lines=[
+            ("Wangi aromatik dari ekstrak", 0.1, "text"),
+            ("tumbuhan semulajadi 🌸", 0.1, "text"),
+        ],
+    ),
+    dict(
+        src="D", t_in=17.0, t_out=21.0, speed=1.3,
+        lines=[("Sesuai untuk seisi keluarga 🏡", 0.08, "text")],
+        sfx=[(0.1, "ding", 0.45)],
+    ),
+    dict(  # CTA, text only
+        src="D", t_in=26.0, t_out=30.4, speed=1.1,
+        lines=[
+            ("Jangan tunggu kulit makin kering 😭", 0.1, "text"),
+            ("Tekan beg kuning &", 1.1, "cta"),
+            ("checkout sekarang! 🛒💛", 1.1, "cta"),
+        ],
+        sfx=[(0.0, "whoosh", 0.5)],
+    ),
+]
+
+# layout (fractions of the 1080x1920 frame; scaled for preview)
+TEXT_TOP = 0.185          # block starts ~18.5% from top
+TEXT_SIZE = 60            # Fredoka px at 1080 wide
+NAME_SIZE = 92            # Pacifico px at 1080 wide
+LINE_GAP = 1.06           # tight line spacing
+POP_DUR = 0.28
+BASE_MARGIN = 1.08        # decode slightly larger so push-ins stay sharp
+PUSH = 0.03               # slow push-in across a scene
+PUNCH = 0.035             # small punch-in at each cut
+PUNCH_DUR = 0.22
+
+EMOJI_RE = re.compile(
+    "([\U0001F000-\U0001FAFF☀-➿⬀-⯿⌀-⏿]"
+    "[️\U0001F3FB-\U0001F3FF]*(?:‍[\U0001F000-\U0001FAFF☀-➿][️]?)*)"
+)
+
+
+# ---------------------------------------------------------------------------
+# text rendering
+# ---------------------------------------------------------------------------
+class TextKit:
+    def __init__(self, scale):
+        self.scale = scale
+        self.size = round(TEXT_SIZE * scale)
+        self.font = ImageFont.truetype(FONT_TEXT, self.size)
+        self.name_size = round(NAME_SIZE * scale)
+        self.name_font = ImageFont.truetype(FONT_NAME, self.name_size)
+        self.emoji_font = ImageFont.truetype(FONT_EMOJI, 109)
+        self.stroke = max(1, round(3 * scale))
+        self._emoji_cache = {}
+
+    def emoji(self, ch, h):
+        key = (ch, h)
+        if key not in self._emoji_cache:
+            im = Image.new("RGBA", (300, 160), (0, 0, 0, 0))
+            ImageDraw.Draw(im).text((10, 10), ch, font=self.emoji_font, embedded_color=True)
+            im = im.crop(im.getbbox())
+            w = round(im.width * h / im.height)
+            self._emoji_cache[key] = im.resize((w, h), Image.LANCZOS)
+        return self._emoji_cache[key]
+
+    def _shadowed(self, im):
+        """Thin dark outline is drawn with the glyphs; add a soft drop shadow."""
+        a = im.split()[3]
+        sh = Image.new("RGBA", im.size, OUTLINE + (0,))
+        sh.putalpha(a.point(lambda v: int(v * 0.55)))
+        sh = sh.filter(ImageFilter.GaussianBlur(max(1, 3 * self.scale)))
+        out = Image.new("RGBA", im.size, (0, 0, 0, 0))
+        off = max(1, round(3 * self.scale))
+        out.alpha_composite(sh, (0, off))
+        out.alpha_composite(im)
+        return out
+
+    def line(self, text):
+        """Render a Fredoka line with inline colour emoji -> RGBA image."""
+        f = self.font
+        asc, desc = f.getmetrics()
+        pad = round(14 * self.scale)
+        h = asc + desc + 2 * pad
+        eh = round(self.size * 1.0)
+        parts = [p for p in EMOJI_RE.split(text) if p]
+        widths = []
+        for p in parts:
+            if EMOJI_RE.fullmatch(p):
+                widths.append(self.emoji(p, eh).width + round(4 * self.scale))
+            else:
+                widths.append(round(f.getlength(p)))
+        w = sum(widths) + 2 * pad
+        im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        d = ImageDraw.Draw(im)
+        x = pad
+        for p, pw in zip(parts, widths):
+            if EMOJI_RE.fullmatch(p):
+                e = self.emoji(p, eh)
+                y = pad + round(asc * 0.62) - e.height // 2
+                im.alpha_composite(e, (x + round(2 * self.scale), y))
+            else:
+                d.text((x, pad), p, font=f, fill=(255, 255, 255, 255),
+                       stroke_width=self.stroke, stroke_fill=OUTLINE + (235,))
+            x += pw
+        return self._shadowed(im)
+
+    def name(self, text):
+        """Pacifico product name. Returns (text_layer, marker_layer) same size."""
+        f = self.name_font
+        pad = round(30 * self.scale)
+        bbox = f.getbbox(text)
+        tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        w, h = tw + 2 * pad + round(40 * self.scale), th + 2 * pad
+        txt = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        ImageDraw.Draw(txt).text(((w - tw) // 2 - bbox[0], pad - bbox[1]), text, font=f,
+                                 fill=(255, 255, 255, 255), stroke_width=self.stroke,
+                                 stroke_fill=OUTLINE + (230,))
+        txt = self._shadowed(txt)
+        # marker: slightly tilted, rounded, hand-drawn-ish band behind the lower 70% of the word
+        mk = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        md = ImageDraw.Draw(mk)
+        x0, x1 = round(10 * self.scale), w - round(10 * self.scale)
+        y0, y1 = pad + th * 0.18, pad + th * 1.02
+        r = (y1 - y0) * 0.35
+        md.rounded_rectangle([x0, y0, x1, y1], radius=r, fill=BRAND_PURPLE + (235,))
+        mk = mk.rotate(-1.5, resample=Image.BICUBIC)
+        return txt, mk
+
+
+def ease_out_back(x):
+    c1, c3 = 1.70158, 2.70158
+    return 1 + c3 * (x - 1) ** 3 + c1 * (x - 1) ** 2
+
+
+def ease_out(x):
+    return 1 - (1 - x) ** 3
+
+
+def paste_scaled(frame, im, cx, cy, s, alpha):
+    if s <= 0.01 or alpha <= 0:
+        return
+    if abs(s - 1) > 1e-3:
+        im = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.BICUBIC)
+    if alpha < 1:
+        a = im.split()[3].point(lambda v: int(v * alpha))
+        im = im.copy()
+        im.putalpha(a)
+    frame.alpha_composite(im, (round(cx - im.width / 2), round(cy - im.height / 2)))
+
+
+def star(size, color=(255, 255, 255)):
+    """4-point sparkle star."""
+    s = size * 4
+    im = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    c = s / 2
+    k = s * 0.09
+    d.polygon([(c, 0), (c + k, c - k), (s, c), (c + k, c + k), (c, s), (c - k, c + k), (0, c), (c - k, c - k)],
+              fill=color + (255,))
+    im = im.resize((size, size), Image.LANCZOS)
+    glow = im.filter(ImageFilter.GaussianBlur(size / 8))
+    out = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    out.alpha_composite(glow)
+    out.alpha_composite(im)
+    return out
+
+
+class Overlay:
+    """Pre-renders a scene's text and draws it animated onto frames."""
+
+    def __init__(self, kit, scene, W, H):
+        self.kit, self.W, self.H = kit, W, H
+        self.items = []
+        y = TEXT_TOP * H
+        for text, t0, kind in scene["lines"]:
+            if kind == "name":
+                txt, mk = kit.name(text)
+                self.items.append(dict(kind=kind, t0=t0, txt=txt, mk=mk, cy=y + txt.height / 2))
+                y += txt.height * 0.9
+                self.sparkle_big = star(round(46 * kit.scale), (255, 244, 200))
+                self.sparkle_small = star(round(28 * kit.scale))
+            else:
+                im = kit.line(text)
+                maxw = 0.86 * W  # keep clear of the screen edges
+                f = 1.0
+                if im.width > maxw:
+                    f = maxw / im.width
+                    im = im.resize((round(im.width * f), round(im.height * f)), Image.LANCZOS)
+                self.items.append(dict(kind=kind, t0=t0, im=im, cy=y + im.height / 2))
+                y += kit.size * LINE_GAP * f
+
+    def draw(self, frame, t):
+        cx = self.W / 2
+        for it in self.items:
+            dt = t - it["t0"]
+            if dt < 0:
+                continue
+            if it["kind"] == "name":
+                self._draw_name(frame, it, dt)
+                continue
+            p = min(dt / POP_DUR, 1)
+            s = 0.55 + 0.45 * ease_out_back(p)
+            a = min(dt / 0.1, 1)
+            paste_scaled(frame, it["im"], cx, it["cy"], s, a)
+
+    def _draw_name(self, frame, it, dt):
+        txt, mk = it["txt"], it["mk"]
+        w, h = txt.size
+        x0 = round(self.W / 2 - w / 2)
+        y0 = round(it["cy"] - h / 2)
+        # marker wipes in first (0-0.35s), then the handwriting writes left->right (0.15-1.0s)
+        pm = ease_out(min(dt / 0.35, 1))
+        pt = min(max((dt - 0.15) / 0.85, 0), 1)
+        self._wipe(frame, mk, x0, y0, pm)
+        self._wipe(frame, txt, x0, y0, pt)
+        # sparkles twinkle once writing is done
+        if dt > 0.9:
+            k = dt - 0.9
+            pts = [(0.03, 0.12, 1.0, self.sparkle_big), (0.98, 0.22, 0.6, self.sparkle_big),
+                   (0.93, 0.92, 1.4, self.sparkle_small), (0.08, 0.88, 0.3, self.sparkle_small)]
+            for fx, fy, ph, im in pts:
+                tw = 0.55 + 0.45 * math.sin(k * 7 + ph * 3)
+                s = ease_out_back(min(k / 0.3, 1)) * tw
+                paste_scaled(frame, im, x0 + fx * w, y0 + fy * h, s, min(k / 0.15, 1))
+
+    @staticmethod
+    def _wipe(frame, im, x0, y0, p):
+        if p <= 0:
+            return
+        w, h = im.size
+        if p >= 1:
+            frame.alpha_composite(im, (x0, y0))
+            return
+        edge = max(4, w // 20)
+        xs = np.arange(w)
+        front = p * (w + edge)
+        ramp = np.clip((front - xs) / edge, 0, 1)
+        mask = (np.array(im.split()[3], dtype=np.float32) * ramp[None, :]).astype(np.uint8)
+        im2 = im.copy()
+        im2.putalpha(Image.fromarray(mask))
+        frame.alpha_composite(im2, (x0, y0))
+
+
+# ---------------------------------------------------------------------------
+# video
+# ---------------------------------------------------------------------------
+def scene_frames(path, sc, BW, BH):
+    """Yield RGB frames (BW x BH) for a scene, decoded from the original clip."""
+    dur_out = (sc["t_out"] - sc["t_in"]) / sc["speed"]
+    n = round(dur_out * FPS)
+    probe = subprocess.run(
+        ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
+         "stream=width,height:stream_side_data=rotation", "-of", "default=nw=1", path],
+        capture_output=True, text=True).stdout
+    vals = dict(l.split("=", 1) for l in probe.split() if "=" in l)
+    w, h = int(vals["width"]), int(vals["height"])
+    if abs(int(float(vals.get("rotation", 0)))) == 90:
+        w, h = h, w
+    if w / h > 9 / 16 + 1e-3:  # landscape -> 9:16 crop
+        cw = round(h * 9 / 16)
+        x = int(min(max(sc.get("cx", 0.5) * w - cw / 2, 0), w - cw))
+        crop = f"crop={cw}:{h}:{x}:0,"
+    else:
+        crop = ""
+    vf = (f"setpts=(PTS-STARTPTS)/{sc['speed']},fps={FPS},{crop}"
+          f"scale={BW}:{BH}:flags=lanczos,format=rgb24")
+    cmd = ["ffmpeg", "-v", "error", "-ss", f"{sc['t_in']}", "-t", f"{sc['t_out'] - sc['t_in']}",
+           "-i", path, "-an", "-vf", vf, "-f", "rawvideo", "-"]
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    fsz = BW * BH * 3
+    last = None
+    for _ in range(n):
+        buf = proc.stdout.read(fsz)
+        if len(buf) == fsz:
+            last = Image.frombuffer("RGB", (BW, BH), buf, "raw", "RGB", 0, 1)
+        yield last
+    proc.kill()  # stop decoding; we have all frames we need
+    proc.stdout.close()
+    proc.wait()
+
+
+def build_sfx_events(scenes_meta):
+    ev = []
+    alt = 0
+    for start, sc, ov in scenes_meta:
+        if sc.get("flash"):
+            ev.append((start, "whoosh", 0.55, 0.0))
+        for t, name, g in sc.get("sfx", []):
+            ev.append((start + t, name, g, 0.0))
+        seen_t = set()
+        for it in ov.items:
+            t = start + it["t0"]
+            if it["kind"] == "name":
+                ev += [(t, "whoosh", 0.45, -0.2), (t + 0.15, "pen", 0.6, 0.1), (t + 0.85, "shimmer", 0.5, 0.0)]
+                continue
+            key = round(t, 2)
+            if key in seen_t:  # two-row sentence: one sound
+                continue
+            seen_t.add(key)
+            if it["kind"] == "check":
+                ev.append((t + 0.02, "tick", 0.55, 0.0))
+            elif it["kind"] == "cta":
+                ev.append((t + 0.02, "kaching", 0.75, 0.0))
+            else:
+                ev.append((t, "pop" if alt % 2 == 0 else "bubble", 0.6, 0.0))
+                alt += 1
+        texts = " ".join(l[0] for l in sc["lines"])
+        if "✨" in texts:
+            first = next(l for l in sc["lines"] if "✨" in l[0])
+            ev.append((start + first[1] + 0.12, "sparkle", 0.45, 0.25))
+    return ev
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--src", required=True, help="folder with the original clips")
+    ap.add_argument("--out", required=True)
+    ap.add_argument("--preview", action="store_true", help="540x960 quick render")
+    args = ap.parse_args()
+
+    W, H = (540, 960) if args.preview else (1080, 1920)
+    scale = W / 1080
+    BW, BH = round(W * BASE_MARGIN / 2) * 2, round(H * BASE_MARGIN / 2) * 2
+    kit = TextKit(scale)
+
+    meta, start = [], 0.0
+    for sc in SCENES:
+        dur = (sc["t_out"] - sc["t_in"]) / sc["speed"]
+        assert dur < 5, f"scene too long: {dur:.2f}s"
+        meta.append((start, sc, Overlay(kit, sc, W, H)))
+        start += round(dur * FPS) / FPS
+    total = start
+    assert total < 60
+    print(f"{len(SCENES)} scenes, total {total:.2f}s", flush=True)
+
+    tmp = tempfile.mkdtemp(prefix="avco_")
+    wav = os.path.join(tmp, "sfx.wav")
+    sfx.mix_timeline(build_sfx_events(meta), total, wav)
+
+    enc = (["-c:v", "libx264", "-preset", "medium", "-crf", "23"] if args.preview else
+           ["-c:v", "libx264", "-preset", "slow", "-crf", "15", "-profile:v", "high", "-tune", "film"])
+    cmd = ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
+           "-r", str(FPS), "-i", "-", "-i", wav,
+           "-vf", "scale=out_color_matrix=bt709:out_range=tv,format=yuv420p",
+           *enc, "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709",
+           "-color_range", "tv", "-c:a", "aac", "-b:a", "192k", "-shortest",
+           "-movflags", "+faststart", args.out]
+    out = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+
+    for i, (s0, sc, ov) in enumerate(meta):
+        dur = (sc["t_out"] - sc["t_in"]) / sc["speed"]
+        path = os.path.join(args.src, CLIPS[sc["src"]])
+        for fi, base in enumerate(scene_frames(path, sc, BW, BH)):
+            t = fi / FPS
+            z = 1 + PUSH * (t / dur) + PUNCH * (1 - ease_out(min(t / PUNCH_DUR, 1)))
+            # z == 1 shows the whole source frame (no extra zoom)
+            cw, ch = BW / z, BH / z
+            box = ((BW - cw) / 2, (BH - ch) / 2, (BW + cw) / 2, (BH + ch) / 2)
+            frame = base.resize((W, H), Image.BICUBIC, box=box).convert("RGBA")
+            ov.draw(frame, t)
+            if sc.get("flash") and t < 0.25:
+                a = int(220 * (1 - t / 0.25) ** 1.5)
+                frame.alpha_composite(Image.new("RGBA", (W, H), (255, 255, 255, a)))
+            out.stdin.write(frame.convert("RGB").tobytes())
+        print(f"scene {i + 1}/{len(meta)} done", flush=True)
+    out.stdin.close()
+    out.wait()
+    print("wrote", args.out)
+
+
+if __name__ == "__main__":
+    main()
