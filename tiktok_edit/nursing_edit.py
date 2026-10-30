@@ -124,16 +124,16 @@ SCENES = [
             ("✅ Secure menyusu kat public", 1.65, "check"),
         ],
     ),
-    dict(  # CTA 1/2 - zipping up the front
-        src="O", t_in=51.0, t_out=55.0, speed=1.1,
+    dict(  # CTA 1/2 - posing, turning side to front
+        src="O", t_in=45.5, t_out=49.8, speed=1.15,
         lines=[
             ("Jangan tunggu baby meragam", 0.08, "text"),
             ("kat luar baru nak cari 😭", 0.08, "text"),
         ],
         sfx=[(0.0, "whoosh", 0.5)],
     ),
-    dict(  # CTA 2/2, text only - wearing it, front view
-        src="O", t_in=57.5, t_out=62.0, speed=1.1,
+    dict(  # CTA 2/2, text only - posing front, turn and swish
+        src="O", t_in=62.5, t_out=67.0, speed=1.1,
         lines=[
             ("Harga pun murah 😍", 0.08, "text"),
             ("Tekan beg kuning &", 1.0, "cta"),
