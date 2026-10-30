@@ -15,4 +15,4 @@ python3 avco_edit.py --src "/path/to/AVCO 1" --out final.mp4               # 108
 - `fonts/` – Fredoka SemiBold, Pacifico (SIL Open Font License, Google Fonts)
 - Emoji: system Noto Color Emoji (`/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf`)
 
-Text only uses claims printed on the packaging.
+Body text is copied from the reference video; only the hook and CTA are new.

@@ -44,81 +44,76 @@ CLIPS = {
 # Edit decision list. Times are seconds in the source clip; text times are
 # seconds from the start of the scene. cx = horizontal crop centre (0..1) for
 # landscape clips. Every scene is < 5 s.
-# Wording only uses claims printed on the packaging:
-#   front: Aromatic Virgin Coconut Oil, Morning Dew, Rich in Antioxidant & Vitamin E
-#   back:  Moisturize, nourish and soften skin & hair; natural make-up remover;
-#          suitable for the entire family; >99% pure virgin coconut oil;
-#          <1% natural plant extract fragrance; cold press process; 100% natural
+# Body text is copied word-for-word from the reference video (two typos fixed:
+# "baban" -> "bahan", "ristko" -> "risiko"; "-" bullets shown as ✅).
+# Only the hook and the CTA are new.
 # ---------------------------------------------------------------------------
 SCENES = [
     dict(  # HOOK on the best texture shot
         src="B", t_in=2.6, t_out=6.2, speed=1.2, cx=0.56,
         lines=[
-            ("Kulit & rambut kering", 0.05, "text"),
-            ("tak bermaya? 😩", 0.05, "text"),
+            ("Nak bersalin mudah,", 0.05, "text"),
+            ("tak koyak, tak jahit? 🤰", 0.05, "text"),
             ("Minyak kelapa dara ni", 1.25, "text"),
             ("WAJIB ada! 🛒✨", 1.25, "text"),
         ],
     ),
-    dict(  # product name over the front label
-        src="D", t_in=7.6, t_out=11.6, speed=1.2, flash=True,
+    dict(  # product label over the front of the bottle
+        src="D", t_in=7.6, t_out=12.4, speed=1.2, flash=True,
         lines=[
-            ("AVCO Morning Dew", 0.12, "name"),
-            ("Aromatic Virgin Coconut Oil 🥥", 1.35, "text"),
+            ("D'Aura AROMATIC", 0.1, "name"),
+            ("VIRGIN COCONUT OIL", 0.7, "name"),
+            ("Morning Dew", 1.35, "name"),
         ],
     ),
     dict(
         src="A", t_in=10.0, t_out=15.5, speed=1.4,
         lines=[
-            ("Kaya dengan Antioxidant", 0.1, "text"),
-            ("& Vitamin E 🌿", 0.1, "text"),
+            ("Ibu preggy dah buat urutan", 0.08, "text"),
+            ("perineum belum ?", 0.08, "text"),
+            ("34 week dah boleh", 1.3, "text"),
+            ("start dah !", 1.3, "text"),
         ],
-        sfx=[(0.12, "ding", 0.5)],
     ),
-    dict(  # back label: multi function
+    dict(  # back label
         src="A", t_in=17.5, t_out=26.5, speed=2.0,
         lines=[
-            ("Multi fungsi! 💜", 0.05, "text"),
-            ("✅ Lembap & lembutkan kulit", 0.75, "check"),
-            ("✅ Nutrisi & lembutkan rambut", 1.45, "check"),
-            ("✅ Pembersih make-up semulajadi", 2.15, "check"),
+            ("Kegunaan minyak kelapa dara", 0.05, "text"),
+            ("✅ bantu menganjalkan laluan bersalin", 0.7, "check"),
+            ("✅ boleh guna untuk urutan badan", 1.35, "check"),
+            ("✅ menyihatkan rambut", 2.0, "check"),
+            ("(rambut kering & bercabang)", 2.0, "check"),
         ],
     ),
     dict(  # glossy hand
         src="C", t_in=0.0, t_out=6.0, speed=1.5, cx=0.42,
         lines=[
-            ("Sapu sikit je, kulit nampak", 0.1, "text"),
-            ("lembap & glowing ✨", 0.1, "text"),
-        ],
-    ),
-    dict(  # back label, second angle with badges
-        src="A", t_in=35.0, t_out=40.5, speed=1.5,
-        lines=[
-            ("✅ >99% minyak kelapa dara tulen", 0.1, "check"),
-            ("✅ Proses cold press", 0.8, "check"),
-            ("✅ 100% natural", 1.5, "check"),
+            ("100% bahan semulajadi (selamat", 0.1, "text"),
+            ("untuk ibu & bayi tanpa bahan kimia)", 0.1, "text"),
         ],
     ),
     dict(  # pump
         src="A", t_in=48.5, t_out=53.5, speed=2.0,
-        lines=[("Botol pam, senang guna! 👌", 0.08, "text")],
-    ),
-    dict(  # swatch, second moment
-        src="B", t_in=8.0, t_out=12.0, speed=1.3, cx=0.55,
         lines=[
-            ("Wangi aromatik dari ekstrak", 0.1, "text"),
-            ("tumbuhan semulajadi 🌸", 0.1, "text"),
+            ("bau aroma bunga", 0.08, "text"),
+            ("yang lembut", 0.08, "text"),
         ],
     ),
     dict(
-        src="D", t_in=17.0, t_out=21.0, speed=1.3,
-        lines=[("Sesuai untuk seisi keluarga 🏡", 0.08, "text")],
+        src="D", t_in=17.0, t_out=21.6, speed=1.2,
+        lines=[
+            ("Ikhtiar untuk kurangkan", 0.08, "text"),
+            ("risiko koyakan & jahitan", 0.08, "text"),
+            ("semasa bersalin !", 0.08, "text"),
+            ("Dengan buat urutan perineum", 1.2, "text"),
+        ],
         sfx=[(0.1, "ding", 0.45)],
     ),
     dict(  # CTA, text only
         src="D", t_in=26.0, t_out=30.4, speed=1.1,
         lines=[
-            ("Jangan tunggu kulit makin kering 😭", 0.1, "text"),
+            ("Jangan tunggu dah sarat", 0.1, "text"),
+            ("baru nak start 😭", 0.1, "text"),
             ("Tekan beg kuning &", 1.1, "cta"),
             ("checkout sekarang! 🛒💛", 1.1, "cta"),
         ],
@@ -128,8 +123,9 @@ SCENES = [
 
 # layout (fractions of the 1080x1920 frame; scaled for preview)
 TEXT_TOP = 0.185          # block starts ~18.5% from top
-TEXT_SIZE = 60            # Fredoka px at 1080 wide
-NAME_SIZE = 92            # Pacifico px at 1080 wide
+TEXT_SIZE = 60            # Fredoka px at 1080 wide (max; one size for all lines)
+NAME_SIZE = 96            # Pacifico px at 1080 wide (max; one size for all rows)
+MAX_TEXT_W = 0.88         # longest line must fit within 88% of the width
 LINE_GAP = 1.06           # tight line spacing
 POP_DUR = 0.28
 BASE_MARGIN = 1.08        # decode slightly larger so push-ins stay sharp
@@ -147,11 +143,11 @@ EMOJI_RE = re.compile(
 # text rendering
 # ---------------------------------------------------------------------------
 class TextKit:
-    def __init__(self, scale):
+    def __init__(self, scale, text_size, name_size):
         self.scale = scale
-        self.size = round(TEXT_SIZE * scale)
+        self.size = text_size
         self.font = ImageFont.truetype(FONT_TEXT, self.size)
-        self.name_size = round(NAME_SIZE * scale)
+        self.name_size = name_size
         self.name_font = ImageFont.truetype(FONT_NAME, self.name_size)
         self.emoji_font = ImageFont.truetype(FONT_EMOJI, 109)
         self.stroke = max(1, round(3 * scale))
@@ -276,22 +272,19 @@ class Overlay:
         self.kit, self.W, self.H = kit, W, H
         self.items = []
         y = TEXT_TOP * H
-        for text, t0, kind in scene["lines"]:
+        names = [i for i, l in enumerate(scene["lines"]) if l[2] == "name"]
+        for i, (text, t0, kind) in enumerate(scene["lines"]):
             if kind == "name":
                 txt, mk = kit.name(text)
-                self.items.append(dict(kind=kind, t0=t0, txt=txt, mk=mk, cy=y + txt.height / 2))
-                y += txt.height * 0.9
+                self.items.append(dict(kind=kind, t0=t0, txt=txt, mk=mk, cy=y + txt.height / 2,
+                                       first=i == names[0], last=i == names[-1]))
+                y += txt.height * 0.72
                 self.sparkle_big = star(round(46 * kit.scale), (255, 244, 200))
                 self.sparkle_small = star(round(28 * kit.scale))
             else:
                 im = kit.line(text)
-                maxw = 0.86 * W  # keep clear of the screen edges
-                f = 1.0
-                if im.width > maxw:
-                    f = maxw / im.width
-                    im = im.resize((round(im.width * f), round(im.height * f)), Image.LANCZOS)
                 self.items.append(dict(kind=kind, t0=t0, im=im, cy=y + im.height / 2))
-                y += kit.size * LINE_GAP * f
+                y += kit.size * LINE_GAP
 
     def draw(self, frame, t):
         cx = self.W / 2
@@ -317,11 +310,13 @@ class Overlay:
         pt = min(max((dt - 0.15) / 0.85, 0), 1)
         self._wipe(frame, mk, x0, y0, pm)
         self._wipe(frame, txt, x0, y0, pt)
-        # sparkles twinkle once writing is done
-        if dt > 0.9:
+        # sparkles twinkle on the first and last label rows once written
+        if dt > 0.9 and (it["first"] or it["last"]):
             k = dt - 0.9
-            pts = [(0.03, 0.12, 1.0, self.sparkle_big), (0.98, 0.22, 0.6, self.sparkle_big),
-                   (0.93, 0.92, 1.4, self.sparkle_small), (0.08, 0.88, 0.3, self.sparkle_small)]
+            if it["first"]:
+                pts = [(0.03, 0.15, 1.0, self.sparkle_big), (0.97, 0.2, 0.6, self.sparkle_small)]
+            else:
+                pts = [(0.95, 0.25, 0.6, self.sparkle_big), (0.06, 0.85, 0.3, self.sparkle_small)]
             for fx, fy, ph, im in pts:
                 tw = 0.55 + 0.45 * math.sin(k * 7 + ph * 3)
                 s = ease_out_back(min(k / 0.3, 1)) * tw
@@ -395,7 +390,11 @@ def build_sfx_events(scenes_meta):
         for it in ov.items:
             t = start + it["t0"]
             if it["kind"] == "name":
-                ev += [(t, "whoosh", 0.45, -0.2), (t + 0.15, "pen", 0.6, 0.1), (t + 0.85, "shimmer", 0.5, 0.0)]
+                if it["first"]:
+                    ev.append((t, "whoosh", 0.45, -0.2))
+                ev.append((t + 0.15, "pen", 0.55, 0.1))
+                if it["last"]:
+                    ev.append((t + 0.85, "shimmer", 0.5, 0.0))
                 continue
             key = round(t, 2)
             if key in seen_t:  # two-row sentence: one sound
@@ -425,7 +424,17 @@ def main():
     W, H = (540, 960) if args.preview else (1080, 1920)
     scale = W / 1080
     BW, BH = round(W * BASE_MARGIN / 2) * 2, round(H * BASE_MARGIN / 2) * 2
-    kit = TextKit(scale)
+    # one font size for every text line (and one for every label row): the largest
+    # size at which the longest line still fits
+    probe = TextKit(scale, round(TEXT_SIZE * scale), round(NAME_SIZE * scale))
+    texts = [l[0] for sc in SCENES for l in sc["lines"] if l[2] != "name"]
+    names = [l[0] for sc in SCENES for l in sc["lines"] if l[2] == "name"]
+    tw = max(probe.line(t).width for t in texts)
+    nw = max(probe.name(t)[0].width for t in names)
+    tsize = int(probe.size * min(1, MAX_TEXT_W * W / tw))
+    nsize = int(probe.name_size * min(1, 0.95 * W / nw))
+    print(f"text size {tsize}px, label size {nsize}px", flush=True)
+    kit = TextKit(scale, tsize, nsize)
 
     meta, start = [], 0.0
     for sc in SCENES:
