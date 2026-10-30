@@ -61,8 +61,8 @@ SCENES = [
             ("dekat luar? 😩", 0.03, "text"),
         ],
     ),
-    dict(  # HOOK 2/2 - whole cover held open
-        src="O", t_in=5.0, t_out=7.4, speed=1.6,
+    dict(  # HOOK 2/2 - seated, wearing it: front and zip close up
+        src="S3", t_in=0.0, t_out=1.6, speed=1.05,
         lines=[
             ("Nursing cover ni", 0.03, "text"),
             ("WAJIB ada! 🛒✨", 0.03, "text"),
@@ -171,7 +171,7 @@ class TextKit:
         self.font = ImageFont.truetype(FONT_TEXT, self.size)
         self.name_size = name_size
         self.name_font = ImageFont.truetype(FONT_NAME, self.name_size)
-        self.sub_font = ImageFont.truetype(FONT_SUB, round(name_size * 0.7))
+        self.sub_font = ImageFont.truetype(FONT_SUB, round(name_size * 0.52))
         self.emoji_font = ImageFont.truetype(FONT_EMOJI, 109)
         self.stroke = max(1, round(3 * scale))
         self._emoji_cache = {}
@@ -323,7 +323,7 @@ class Overlay:
                 y += txt.height * 0.72
             elif kind == "sub":
                 im = kit.sub(text)
-                y += im.height * 0.08
+                y -= im.height * 0.08  # tuck the subtitle in close under the name
                 self.items.append(dict(kind=kind, t0=t0, im=im, cy=y + im.height / 2))
                 y += im.height
             else:
