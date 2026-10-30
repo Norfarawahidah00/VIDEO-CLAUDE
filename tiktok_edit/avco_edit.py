@@ -27,9 +27,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 FPS = 30
 FONT_TEXT = os.path.join(HERE, "fonts", "Fredoka-SemiBold.ttf")
 FONT_NAME = os.path.join(HERE, "fonts", "Pacifico-Regular.ttf")
+FONT_SUB = os.path.join(HERE, "fonts", "Quicksand-Bold.ttf")
 FONT_EMOJI = "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf"
 
-BRAND_PURPLE = (108, 84, 214)  # violet of the AVCO label
+MARKER_BLUE = (60, 150, 255, 150)  # translucent blue highlighter behind the label
 OUTLINE = (25, 20, 35)
 
 # Source clips (all 3840x2160 HEVC; A/D are portrait, B/C landscape after autorotate)
@@ -49,21 +50,26 @@ CLIPS = {
 # Only the hook and the CTA are new.
 # ---------------------------------------------------------------------------
 SCENES = [
-    dict(  # HOOK on the best texture shot
-        src="B", t_in=2.6, t_out=6.2, speed=1.2, cx=0.56,
+    dict(  # HOOK 1/2 - product front
+        src="A", t_in=0.0, t_out=2.0, speed=1.2,
         lines=[
             ("Nak bersalin mudah,", 0.05, "text"),
             ("tak koyak, tak jahit? 🤰", 0.05, "text"),
-            ("Minyak kelapa dara ni", 1.25, "text"),
-            ("WAJIB ada! 🛒✨", 1.25, "text"),
+        ],
+    ),
+    dict(  # HOOK 2/2 - oil texture
+        src="B", t_in=2.8, t_out=4.6, speed=1.2, cx=0.56,
+        lines=[
+            ("Minyak kelapa dara ni", 0.03, "text"),
+            ("WAJIB ada! 🛒✨", 0.03, "text"),
         ],
     ),
     dict(  # product label over the front of the bottle
         src="D", t_in=7.6, t_out=12.4, speed=1.2, flash=True,
         lines=[
-            ("D'Aura AROMATIC", 0.1, "name"),
-            ("VIRGIN COCONUT OIL", 0.7, "name"),
-            ("Morning Dew", 1.35, "name"),
+            ("D'Aura Aromatic", 0.1, "name"),
+            ("Virgin Coconut Oil", 0.7, "name"),
+            ("Morning Dew", 1.5, "sub"),
         ],
     ),
     dict(
@@ -85,8 +91,8 @@ SCENES = [
             ("(rambut kering & bercabang)", 2.0, "check"),
         ],
     ),
-    dict(  # glossy hand
-        src="C", t_in=0.0, t_out=6.0, speed=1.5, cx=0.42,
+    dict(  # glossy hand, zoomed in on the oiled skin
+        src="C", t_in=0.0, t_out=6.0, speed=1.5, cx=0.45, cy=0.55, zoom=1.3,
         lines=[
             ("100% bahan semulajadi (selamat", 0.1, "text"),
             ("untuk ibu & bayi tanpa bahan kimia)", 0.1, "text"),
@@ -109,15 +115,20 @@ SCENES = [
         ],
         sfx=[(0.1, "ding", 0.45)],
     ),
-    dict(  # CTA, text only
-        src="D", t_in=26.0, t_out=30.4, speed=1.1,
+    dict(  # CTA 1/2
+        src="D", t_in=0.8, t_out=4.0, speed=1.2,
         lines=[
-            ("Jangan tunggu dah sarat", 0.1, "text"),
-            ("baru nak start 😭", 0.1, "text"),
-            ("Tekan beg kuning &", 1.1, "cta"),
-            ("checkout sekarang! 🛒💛", 1.1, "cta"),
+            ("Jangan tunggu dah sarat", 0.08, "text"),
+            ("baru nak start 😭", 0.08, "text"),
         ],
         sfx=[(0.0, "whoosh", 0.5)],
+    ),
+    dict(  # CTA 2/2, text only
+        src="D", t_in=26.0, t_out=30.4, speed=1.1,
+        lines=[
+            ("Tekan beg kuning &", 0.08, "cta"),
+            ("checkout sekarang! 🛒💛", 0.08, "cta"),
+        ],
     ),
 ]
 
@@ -149,6 +160,7 @@ class TextKit:
         self.font = ImageFont.truetype(FONT_TEXT, self.size)
         self.name_size = name_size
         self.name_font = ImageFont.truetype(FONT_NAME, self.name_size)
+        self.sub_font = ImageFont.truetype(FONT_SUB, round(name_size * 0.7))
         self.emoji_font = ImageFont.truetype(FONT_EMOJI, 109)
         self.stroke = max(1, round(3 * scale))
         self._emoji_cache = {}
@@ -204,6 +216,23 @@ class TextKit:
             x += pw
         return self._shadowed(im)
 
+    def sub(self, text):
+        """Variant name under the label: Quicksand Bold, letter-spaced."""
+        f = self.sub_font
+        track = round(f.size * 0.08)
+        pad = round(18 * self.scale)
+        widths = [f.getlength(c) for c in text]
+        w = round(sum(widths) + track * (len(text) - 1)) + 2 * pad
+        asc, desc = f.getmetrics()
+        im = Image.new("RGBA", (w, asc + desc + 2 * pad), (0, 0, 0, 0))
+        d = ImageDraw.Draw(im)
+        x = pad
+        for c, cw in zip(text, widths):
+            d.text((x, pad), c, font=f, fill=(255, 255, 255, 255),
+                   stroke_width=self.stroke, stroke_fill=OUTLINE + (235,))
+            x += cw + track
+        return self._shadowed(im)
+
     def name(self, text):
         """Pacifico product name. Returns (text_layer, marker_layer) same size."""
         f = self.name_font
@@ -222,7 +251,7 @@ class TextKit:
         x0, x1 = round(10 * self.scale), w - round(10 * self.scale)
         y0, y1 = pad + th * 0.18, pad + th * 1.02
         r = (y1 - y0) * 0.35
-        md.rounded_rectangle([x0, y0, x1, y1], radius=r, fill=BRAND_PURPLE + (235,))
+        md.rounded_rectangle([x0, y0, x1, y1], radius=r, fill=MARKER_BLUE)
         mk = mk.rotate(-1.5, resample=Image.BICUBIC)
         return txt, mk
 
@@ -271,6 +300,8 @@ class Overlay:
     def __init__(self, kit, scene, W, H):
         self.kit, self.W, self.H = kit, W, H
         self.items = []
+        self.sparkle_big = star(round(46 * kit.scale), (255, 244, 200))
+        self.sparkle_small = star(round(28 * kit.scale))
         y = TEXT_TOP * H
         names = [i for i, l in enumerate(scene["lines"]) if l[2] == "name"]
         for i, (text, t0, kind) in enumerate(scene["lines"]):
@@ -279,8 +310,11 @@ class Overlay:
                 self.items.append(dict(kind=kind, t0=t0, txt=txt, mk=mk, cy=y + txt.height / 2,
                                        first=i == names[0], last=i == names[-1]))
                 y += txt.height * 0.72
-                self.sparkle_big = star(round(46 * kit.scale), (255, 244, 200))
-                self.sparkle_small = star(round(28 * kit.scale))
+            elif kind == "sub":
+                im = kit.sub(text)
+                y += im.height * 0.08
+                self.items.append(dict(kind=kind, t0=t0, im=im, cy=y + im.height / 2))
+                y += im.height
             else:
                 im = kit.line(text)
                 self.items.append(dict(kind=kind, t0=t0, im=im, cy=y + im.height / 2))
@@ -299,6 +333,11 @@ class Overlay:
             s = 0.55 + 0.45 * ease_out_back(p)
             a = min(dt / 0.1, 1)
             paste_scaled(frame, it["im"], cx, it["cy"], s, a)
+            if it["kind"] == "sub" and dt > 0.2:
+                self._sparkles(frame, cx - it["im"].width / 2, it["cy"] - it["im"].height / 2,
+                               it["im"].width, it["im"].height, dt - 0.2,
+                               [(0.0, 0.2, 0.6, self.sparkle_big), (1.0, 0.75, 1.4, self.sparkle_small),
+                                (0.96, 0.1, 0.2, self.sparkle_small)])
 
     def _draw_name(self, frame, it, dt):
         txt, mk = it["txt"], it["mk"]
@@ -310,17 +349,16 @@ class Overlay:
         pt = min(max((dt - 0.15) / 0.85, 0), 1)
         self._wipe(frame, mk, x0, y0, pm)
         self._wipe(frame, txt, x0, y0, pt)
-        # sparkles twinkle on the first and last label rows once written
-        if dt > 0.9 and (it["first"] or it["last"]):
-            k = dt - 0.9
-            if it["first"]:
-                pts = [(0.03, 0.15, 1.0, self.sparkle_big), (0.97, 0.2, 0.6, self.sparkle_small)]
-            else:
-                pts = [(0.95, 0.25, 0.6, self.sparkle_big), (0.06, 0.85, 0.3, self.sparkle_small)]
-            for fx, fy, ph, im in pts:
-                tw = 0.55 + 0.45 * math.sin(k * 7 + ph * 3)
-                s = ease_out_back(min(k / 0.3, 1)) * tw
-                paste_scaled(frame, im, x0 + fx * w, y0 + fy * h, s, min(k / 0.15, 1))
+        # sparkles on the first label row once written
+        if dt > 0.9 and it["first"]:
+            self._sparkles(frame, x0, y0, w, h, dt - 0.9,
+                           [(0.03, 0.15, 1.0, self.sparkle_big), (0.97, 0.2, 0.6, self.sparkle_small)])
+
+    def _sparkles(self, frame, x0, y0, w, h, k, pts):
+        for fx, fy, ph, im in pts:
+            tw = 0.55 + 0.45 * math.sin(k * 7 + ph * 3)
+            s = ease_out_back(min(k / 0.3, 1)) * tw
+            paste_scaled(frame, im, x0 + fx * w, y0 + fy * h, s, min(k / 0.15, 1))
 
     @staticmethod
     def _wipe(frame, im, x0, y0, p):
@@ -355,10 +393,14 @@ def scene_frames(path, sc, BW, BH):
     w, h = int(vals["width"]), int(vals["height"])
     if abs(int(float(vals.get("rotation", 0)))) == 90:
         w, h = h, w
-    if w / h > 9 / 16 + 1e-3:  # landscape -> 9:16 crop
-        cw = round(h * 9 / 16)
+    # largest 9:16 window (landscape clips get cropped), optionally zoomed in
+    zoom = sc.get("zoom", 1.0)
+    cw0, ch0 = (h * 9 / 16, h) if w / h > 9 / 16 else (w, w * 16 / 9)
+    cw, ch = round(cw0 / zoom / 2) * 2, round(ch0 / zoom / 2) * 2
+    if (cw, ch) != (w, h):
         x = int(min(max(sc.get("cx", 0.5) * w - cw / 2, 0), w - cw))
-        crop = f"crop={cw}:{h}:{x}:0,"
+        y = int(min(max(sc.get("cy", 0.5) * h - ch / 2, 0), h - ch))
+        crop = f"crop={cw}:{ch}:{x}:{y},"
     else:
         crop = ""
     vf = (f"setpts=(PTS-STARTPTS)/{sc['speed']},fps={FPS},{crop}"
@@ -393,8 +435,9 @@ def build_sfx_events(scenes_meta):
                 if it["first"]:
                     ev.append((t, "whoosh", 0.45, -0.2))
                 ev.append((t + 0.15, "pen", 0.55, 0.1))
-                if it["last"]:
-                    ev.append((t + 0.85, "shimmer", 0.5, 0.0))
+                continue
+            if it["kind"] == "sub":
+                ev += [(t, "bubble", 0.5, 0.0), (t + 0.1, "shimmer", 0.55, 0.0)]
                 continue
             key = round(t, 2)
             if key in seen_t:  # two-row sentence: one sound
@@ -427,7 +470,7 @@ def main():
     # one font size for every text line (and one for every label row): the largest
     # size at which the longest line still fits
     probe = TextKit(scale, round(TEXT_SIZE * scale), round(NAME_SIZE * scale))
-    texts = [l[0] for sc in SCENES for l in sc["lines"] if l[2] != "name"]
+    texts = [l[0] for sc in SCENES for l in sc["lines"] if l[2] not in ("name", "sub")]
     names = [l[0] for sc in SCENES for l in sc["lines"] if l[2] == "name"]
     tw = max(probe.line(t).width for t in texts)
     nw = max(probe.name(t)[0].width for t in names)
