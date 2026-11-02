@@ -28,6 +28,10 @@ from avco_edit import FPS, Overlay, TextKit, ease_out  # noqa: E402
 
 # brand colour: the penguin's magenta, translucent like a highlighter
 base.MARKER_BLUE = (236, 64, 150, 165)
+# text a little smaller and higher than the AVCO edit
+base.TEXT_SIZE = 50   # Fredoka px at 1080 wide
+base.TEXT_TOP = 0.15  # block starts 15% from top
+NAME_TOP = 0.10       # product name block
 
 CLIPS = {k: f"IMG_{k}.MOV" for k in
          ("1516", "1517", "1519", "1522", "1524", "1525", "1527", "1528", "1529", "1530")}
@@ -53,7 +57,7 @@ SCENES = [
         ],
     ),
     dict(  # product name over the penguin's front
-        src="1529", t_in=4.2, t_out=8.6, speed=1.2, flash=True, text_top=0.13,
+        src="1529", t_in=4.2, t_out=8.6, speed=1.2, flash=True, text_top=NAME_TOP,
         lines=[
             ("Penguin", 0.1, "name"),
             ("Punching Toys", 0.55, "name"),
@@ -202,7 +206,7 @@ def main():
     tw = max(probe.line(t).width for t in texts)
     nw = max(probe.name(t)[0].width for t in names)
     tsize = int(probe.size * min(1, base.MAX_TEXT_W * W / tw))
-    nsize = int(probe.name_size * min(1.25, 0.9 * W / nw))
+    nsize = int(probe.name_size * min(1.05, 0.9 * W / nw))
     print(f"text size {tsize}px, name size {nsize}px", flush=True)
     kit = TextKit(scale, tsize, nsize)
 
