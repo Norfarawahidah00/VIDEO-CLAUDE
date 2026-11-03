@@ -94,11 +94,11 @@ SCENES = [
             ("& glukos semua 0 😍", 0.08, "text"),
         ],
     ),
-    dict(  # size
-        src="A", t_in=1.3, t_out=5.0, speed=1.5,
+    dict(  # price / value (no comparative "cheapest" claim)
+        src="A", t_in=1.3, t_out=5.0, speed=1.4,
         lines=[
-            ("Botol 10ml kecil comel", 0.08, "text"),
-            ("tapi dapat 250 titis 💧", 0.08, "text"),
+            ("Harga mampu milik 💸", 0.08, "text"),
+            ("1 botol dapat 250 titis, jimat!", 0.9, "text"),
         ],
     ),
     dict(  # CTA 1/2
