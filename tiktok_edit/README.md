@@ -1,4 +1,4 @@
-# AVCO Morning Dew – TikTok edit
+# D'Aura TikTok edits
 
 Script that cuts the raw D'AURA AVCO clips into a <60 s TikTok video
 (1080x1920, 30 fps) with reference-style text, animated product name and
@@ -16,3 +16,14 @@ python3 avco_edit.py --src "/path/to/AVCO 1" --out final.mp4               # 108
 - Emoji: system Noto Color Emoji (`/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf`)
 
 Body text is copied from the reference video; only the hook and CTA are new.
+
+## Stevia Natural Sweetener
+
+```
+python3 stevia_edit.py --src "/path/to/stevia clips" --out preview.mp4 --preview
+python3 stevia_edit.py --src "/path/to/stevia clips" --out final.mp4
+```
+
+- `stevia_edit.py` – scene list; text taken from the packaging (clips have no speech)
+- iPhone HLG HDR clips are tone-mapped to SDR BT.709 (hable, no grading)
+- `engine.py` – shared text/animation/render engine used by both scripts
