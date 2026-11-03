@@ -7,7 +7,8 @@ without any grading):
   python3 stevia_edit.py --src "<folder with raw clips>" --out final.mp4
 
 - 1080x1920 @ 30 fps (preview: 540x960), original audio removed, no music
-- text in the reference style (white, centred, ~18.5% from top, thin dark outline)
+- text in the reference style (white, centred, ~9% from top so it stays above the
+  bottle, thin dark outline)
 - synthesised SFX only
 
 The raw clips have no speech (only room noise), so every line comes from the
@@ -25,6 +26,9 @@ import argparse
 from engine import render
 
 MARKER_GREEN = (118, 184, 52, 170)  # translucent brand green behind the product name
+TEXT_TOP = 0.09   # text sits above the bottle cap so it never covers the product
+TEXT_SIZE = 50    # Fredoka px at 1080 wide
+NAME_SIZE = 82    # Pacifico px at 1080 wide
 
 CLIPS = {
     "A": "IMG_0779.MOV",  # 13.7 s, drawer background: tilts, front label
@@ -71,8 +75,7 @@ SCENES = [
         lines=[
             ("Khasiatnya:", 0.05, "text"),
             ("✅ Pengganti gula tanpa kalori", 0.7, "check"),
-            ("✅ 150-250x lebih manis", 1.5, "check"),
-            ("daripada gula", 1.5, "check"),
+            ("✅ 150-250x lebih manis dari gula", 1.5, "check"),
         ],
     ),
     dict(  # back label: Penggunaan
@@ -122,7 +125,8 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--preview", action="store_true", help="540x960 quick render")
     args = ap.parse_args()
-    render(SCENES, CLIPS, args.src, args.out, args.preview, marker=MARKER_GREEN, tonemap=True)
+    render(SCENES, CLIPS, args.src, args.out, args.preview, marker=MARKER_GREEN, tonemap=True,
+           text_top=TEXT_TOP, text_size=TEXT_SIZE, name_size=NAME_SIZE)
 
 
 if __name__ == "__main__":

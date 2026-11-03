@@ -191,12 +191,12 @@ def star(size, color=(255, 255, 255)):
 class Overlay:
     """Pre-renders a scene's text and draws it animated onto frames."""
 
-    def __init__(self, kit, scene, W, H):
+    def __init__(self, kit, scene, W, H, text_top=TEXT_TOP):
         self.kit, self.W, self.H = kit, W, H
         self.items = []
         self.sparkle_big = star(round(46 * kit.scale), (255, 244, 200))
         self.sparkle_small = star(round(28 * kit.scale))
-        y = scene.get("text_top", TEXT_TOP) * H
+        y = scene.get("text_top", text_top) * H
         names = [i for i, l in enumerate(scene["lines"]) if l[2] == "name"]
         for i, (text, t0, kind) in enumerate(scene["lines"]):
             if kind == "name":
@@ -360,13 +360,14 @@ def build_sfx_events(scenes_meta):
 
 
 def render(scenes, clips, src, out_path, preview=False, marker=(60, 150, 255, 150),
-           tonemap=False, max_scene=5.0, max_total=60.0):
+           tonemap=False, max_scene=5.0, max_total=60.0,
+           text_top=TEXT_TOP, text_size=TEXT_SIZE, name_size=NAME_SIZE):
     W, H = (540, 960) if preview else (1080, 1920)
     scale = W / 1080
     BW, BH = round(W * BASE_MARGIN / 2) * 2, round(H * BASE_MARGIN / 2) * 2
     # one font size for every text line (and one for every label row): the largest
     # size at which the longest line still fits
-    probe = TextKit(scale, round(TEXT_SIZE * scale), round(NAME_SIZE * scale), marker)
+    probe = TextKit(scale, round(text_size * scale), round(name_size * scale), marker)
     texts = [l[0] for sc in scenes for l in sc["lines"] if l[2] not in ("name", "sub")]
     names = [l[0] for sc in scenes for l in sc["lines"] if l[2] == "name"]
     tw = max(probe.line(t).width for t in texts)
@@ -380,7 +381,7 @@ def render(scenes, clips, src, out_path, preview=False, marker=(60, 150, 255, 15
     for sc in scenes:
         dur = (sc["t_out"] - sc["t_in"]) / sc["speed"]
         assert dur < max_scene, f"scene too long: {dur:.2f}s"
-        meta.append((start, sc, Overlay(kit, sc, W, H)))
+        meta.append((start, sc, Overlay(kit, sc, W, H, text_top)))
         start += round(dur * FPS) / FPS
     total = start
     assert total < max_total
