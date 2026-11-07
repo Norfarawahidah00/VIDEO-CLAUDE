@@ -136,6 +136,7 @@ SCENES = [
 TEXT_TOP = 0.185          # block starts ~18.5% from top
 TEXT_SIZE = 60            # Fredoka px at 1080 wide (max; one size for all lines)
 NAME_SIZE = 96            # Pacifico px at 1080 wide (max; one size for all rows)
+SUB_RATIO = 0.7           # line under the product name, relative to NAME_SIZE
 MAX_TEXT_W = 0.88         # longest line must fit within 88% of the width
 LINE_GAP = 1.06           # tight line spacing
 POP_DUR = 0.28
@@ -160,7 +161,7 @@ class TextKit:
         self.font = ImageFont.truetype(FONT_TEXT, self.size)
         self.name_size = name_size
         self.name_font = ImageFont.truetype(FONT_NAME, self.name_size)
-        self.sub_font = ImageFont.truetype(FONT_SUB, round(name_size * 0.7))
+        self.sub_font = ImageFont.truetype(FONT_SUB, round(name_size * SUB_RATIO))
         self.emoji_font = ImageFont.truetype(FONT_EMOJI, 109)
         self.stroke = max(1, round(3 * scale))
         self._emoji_cache = {}

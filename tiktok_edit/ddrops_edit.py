@@ -23,29 +23,32 @@ import avco_edit as eng
 eng.CLIPS = {
     "A": "VID20261107102613.mp4",  # box on the sofa: front, back panel, side panel
     "B": "VID20261107102831.mp4",  # bottle in hand on the sofa
-    "C": "VID20261107103027.mp4",  # kitchen: milk bottle, dropper, drop into milk
-    "D": "VID20261107103216.mp4",  # kitchen: bottle front label
+    "C": "VID20261107103027.mp4",  # kitchen: drop into the milk (hook only)
 }
 
 eng.MARKER_BLUE = (110, 50, 175, 190)  # Ddrops purple highlighter behind the name
+eng.TEXT_SIZE = 50   # body text (smaller than the AVCO edit)
+eng.NAME_SIZE = 135  # bigger product name
+eng.SUB_RATIO = 0.38  # smaller line under the product name
 
+# Only the sofa footage (A, B) plus the drop-into-milk shot from C.
 eng.SCENES = [
-    dict(  # HOOK 1/2 - the drop falling into the milk
-        src="C", t_in=27.6, t_out=29.6, speed=1.25,
+    dict(  # HOOK 1/2 - dropper moving over the milk
+        src="C", t_in=26.2, t_out=28.0, speed=1.2,
         lines=[
             ("Anak susah makan &", 0.05, "text"),
             ("jarang kena matahari? 😩", 0.05, "text"),
         ],
     ),
-    dict(  # HOOK 2/2 - bottle front next to the milk bottle
-        src="C", t_in=48.6, t_out=50.4, speed=1.2,
+    dict(  # HOOK 2/2 - the drop falling into the milk
+        src="C", t_in=28.0, t_out=29.8, speed=1.2,
         lines=[
             ("Vitamin D3 setitis ni", 0.03, "text"),
             ("WAJIB ada! 🛒✨", 0.03, "text"),
         ],
     ),
-    dict(  # product name over the front label (white flash after the hook)
-        src="D", t_in=5.0, t_out=9.0, speed=1.2, flash=True, text_top=0.10,
+    dict(  # product name over the bottle front label (white flash after the hook)
+        src="B", t_in=0.5, t_out=4.5, speed=1.2, flash=True, text_top=0.10,
         lines=[
             ("Kids Ddrops", 0.1, "name"),
             ("Liquid Vitamin D3", 0.9, "sub"),
@@ -67,14 +70,14 @@ eng.SCENES = [
         ],
     ),
     dict(  # bottle front: 600 IU
-        src="B", t_in=0.5, t_out=5.0, speed=1.2,
+        src="B", t_in=4.5, t_out=9.5, speed=1.2,
         lines=[
             ("Yang ni 600IU sesuai", 0.08, "text"),
             ("untuk anak 1 tahun ke atas 👶", 0.08, "text"),
         ],
     ),
-    dict(  # bottle front in the kitchen
-        src="D", t_in=14.5, t_out=21.5, speed=1.8,
+    dict(  # bottle turning to the side label
+        src="B", t_in=11.0, t_out=19.0, speed=2.0,
         lines=[
             ("Boleh tambah dalam rutin", 0.05, "text"),
             ("harian kalau anak:", 0.05, "text"),
@@ -84,25 +87,16 @@ eng.SCENES = [
             ("daripada makanan harian", 2.05, "check"),
         ],
     ),
-    dict(  # opening the dropper over the milk
-        src="C", t_in=21.6, t_out=25.6, speed=1.2,
+    dict(  # bottle supplement facts (serving size 1 drop)
+        src="B", t_in=21.5, t_out=29.5, speed=2.0,
         lines=[
             ("Cukup 1 titis sehari je 💧", 0.08, "text"),
             ("senang & tak leceh!", 0.9, "text"),
         ],
         sfx=[(0.9, "ding", 0.45)],
     ),
-    dict(  # closing and shaking the milk bottle
-        src="C", t_in=37.5, t_out=45.5, speed=2.0,
-        lines=[
-            ("Cara guna:", 0.05, "text"),
-            ("✅ Titis dalam susu / minuman", 0.6, "check"),
-            ("✅ Letak atas makanan", 1.25, "check"),
-            ("✅ Titis atas jari yang bersih", 1.9, "check"),
-        ],
-    ),
-    dict(  # back panel
-        src="A", t_in=33.0, t_out=44.0, speed=2.5,
+    dict(  # box back panel
+        src="A", t_in=32.0, t_out=42.5, speed=2.5,
         lines=[
             ("Vitamin D3 bagus untuk:", 0.05, "text"),
             ("✅ Sokong tulang yang kuat", 0.6, "check"),
@@ -110,8 +104,17 @@ eng.SCENES = [
             ("✅ Sokong sistem imun", 1.9, "check"),
         ],
     ),
-    dict(  # side panel: directions, no preservatives, USDA organic, non-GMO
-        src="A", t_in=59.5, t_out=67.5, speed=2.0,
+    dict(  # box side panel: directions
+        src="A", t_in=59.5, t_out=63.8, speed=1.2,
+        lines=[
+            ("Cara guna:", 0.05, "text"),
+            ("✅ Titis dalam susu / minuman", 0.6, "check"),
+            ("✅ Letak atas makanan", 1.25, "check"),
+            ("✅ Titis atas jari yang bersih", 1.9, "check"),
+        ],
+    ),
+    dict(  # box side panel: no preservatives, USDA organic, non-GMO
+        src="A", t_in=63.8, t_out=68.6, speed=1.2,
         lines=[
             ("✅ Tanpa pengawet & gula", 0.1, "check"),
             ("✅ Tanpa perisa & pewarna tiruan", 0.75, "check"),
@@ -127,15 +130,15 @@ eng.SCENES = [
         ],
     ),
     dict(  # CTA 1/2 - bottle front on the sofa
-        src="B", t_in=36.5, t_out=42.5, speed=1.5,
+        src="B", t_in=36.5, t_out=40.5, speed=1.2,
         lines=[
             ("Jangan tunggu si kecil", 0.08, "text"),
             ("kurang Vitamin D 😭", 0.08, "text"),
         ],
         sfx=[(0.0, "whoosh", 0.5)],
     ),
-    dict(  # CTA 2/2, text only
-        src="C", t_in=52.0, t_out=56.0, speed=1.1,
+    dict(  # CTA 2/2, text only - box front
+        src="A", t_in=11.5, t_out=15.5, speed=1.1,
         lines=[
             ("Tekan beg kuning &", 0.08, "cta"),
             ("checkout sekarang! 🛒💛", 0.08, "cta"),
