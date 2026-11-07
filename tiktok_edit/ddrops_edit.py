@@ -49,8 +49,8 @@ eng.BASE_MARGIN = 1.12  # decode larger so the zoom stays sharp
 # Every text block sits above the product: text_top is set per shot so the
 # block ends before the top of the bottle/box.
 eng.SCENES = [
-    dict(  # HOOK 1/2 - bottle front on the sofa (cap starts ~30% down)
-        src="B", t_in=37.0, t_out=38.8, speed=1.2,
+    dict(  # HOOK 1/2 - bottle front on the sofa (cap starts ~25% down)
+        src="B", t_in=39.0, t_out=40.8, speed=1.2,
         lines=[
             ("Anak susah makan &", 0.05, "text"),
             ("jarang kena matahari? 😩", 0.05, "text"),
@@ -92,17 +92,17 @@ eng.SCENES = [
             ("Yang ni 600IU sesuai anak umur 1-18 tahun", 0.7, "text"),
         ],
     ),
-    dict(  # bottle lying in the hand (supplement facts), lots of headroom
-        src="B", t_in=25.0, t_out=33.5, speed=2.0, text_top=0.11,
+    dict(  # bottle front coming up into frame (cap 30-45% down)
+        src="B", t_in=34.8, t_out=38.4, speed=1.2, text_top=0.045,
         lines=[
             ("Boleh tambah dalam rutin harian kalau", 0.05, "text"),
             ("anak ada situasi macam ni :", 0.05, "text"),
-            ("✅ Kurang selera makan", 0.6, "check"),
-            ("✅ Kurang terdedah kepada", 1.15, "check"),
-            ("cahaya matahari", 1.15, "check"),
-            ("✅ Kurang dapat sumber Vitamin D", 1.7, "check"),
-            ("daripada makanan harian", 1.7, "check"),
-            ("✅ Kerap sakit", 2.25, "check"),
+            ("✅ Kurang selera makan", 0.5, "check"),
+            ("✅ Kurang terdedah kepada", 0.95, "check"),
+            ("cahaya matahari", 0.95, "check"),
+            ("✅ Kurang dapat sumber Vitamin D", 1.4, "check"),
+            ("daripada makanan harian", 1.4, "check"),
+            ("✅ Kerap sakit", 1.85, "check"),
         ],
     ),
     dict(  # box side panel: "Just one drop" / "Take 1 drop daily" (box top ~13%)
@@ -139,8 +139,8 @@ eng.SCENES = [
             ("dijadikan rutin harian anak ✨", 0.08, "text"),
         ],
     ),
-    dict(  # CTA, text only - bottle front (cap ~20-25%)
-        src="B", t_in=39.0, t_out=42.6, speed=1.1,
+    dict(  # CTA, text only - box front (box top ~11%)
+        src="A", t_in=6.3, t_out=9.6, speed=1.1, text_top=0.03,
         lines=[
             ("Order Now Mummy ! 🛒💛", 0.08, "cta"),
             ("Tekan beg kuning & checkout sekarang!", 0.08, "cta"),
