@@ -28,6 +28,7 @@ FPS = 30
 FONT_TEXT = os.path.join(HERE, "fonts", "Fredoka-SemiBold.ttf")
 FONT_NAME = os.path.join(HERE, "fonts", "Pacifico-Regular.ttf")
 FONT_SUB = os.path.join(HERE, "fonts", "Quicksand-Bold.ttf")
+FONT_POINT = FONT_TEXT  # font for ✅ list lines ("check")
 FONT_EMOJI = "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf"
 
 MARKER_BLUE = (60, 150, 255, 150)  # translucent blue highlighter behind the label
@@ -159,6 +160,7 @@ class TextKit:
         self.scale = scale
         self.size = text_size
         self.font = ImageFont.truetype(FONT_TEXT, self.size)
+        self.point_font = ImageFont.truetype(FONT_POINT, self.size)
         self.name_size = name_size
         self.name_font = ImageFont.truetype(FONT_NAME, self.name_size)
         self.sub_font = ImageFont.truetype(FONT_SUB, round(name_size * SUB_RATIO))
@@ -188,9 +190,9 @@ class TextKit:
         out.alpha_composite(im)
         return out
 
-    def line(self, text):
-        """Render a Fredoka line with inline colour emoji -> RGBA image."""
-        f = self.font
+    def line(self, text, font=None):
+        """Render a text line with inline colour emoji -> RGBA image."""
+        f = font or self.font
         asc, desc = f.getmetrics()
         pad = round(14 * self.scale)
         h = asc + desc + 2 * pad
@@ -317,7 +319,7 @@ class Overlay:
                 self.items.append(dict(kind=kind, t0=t0, im=im, cy=y + im.height / 2))
                 y += im.height
             else:
-                im = kit.line(text)
+                im = kit.line(text, kit.point_font if kind == "check" else None)
                 self.items.append(dict(kind=kind, t0=t0, im=im, cy=y + im.height / 2))
                 y += kit.size * LINE_GAP
 
@@ -471,9 +473,9 @@ def main():
     # one font size for every text line (and one for every label row): the largest
     # size at which the longest line still fits
     probe = TextKit(scale, round(TEXT_SIZE * scale), round(NAME_SIZE * scale))
-    texts = [l[0] for sc in SCENES for l in sc["lines"] if l[2] not in ("name", "sub")]
+    texts = [(l[0], l[2]) for sc in SCENES for l in sc["lines"] if l[2] not in ("name", "sub")]
     names = [l[0] for sc in SCENES for l in sc["lines"] if l[2] == "name"]
-    tw = max(probe.line(t).width for t in texts)
+    tw = max(probe.line(t, probe.point_font if k == "check" else None).width for t, k in texts)
     nw = max(probe.name(t)[0].width for t in names)
     tsize = int(probe.size * min(1, MAX_TEXT_W * W / tw))
     nsize = int(probe.name_size * min(1, 0.95 * W / nw))

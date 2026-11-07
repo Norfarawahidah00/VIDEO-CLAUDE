@@ -27,65 +27,66 @@ eng.CLIPS = {
 }
 
 eng.MARKER_BLUE = (110, 50, 175, 190)  # Ddrops purple highlighter behind the name
-eng.TEXT_SIZE = 50   # body text (smaller than the AVCO edit)
-eng.NAME_SIZE = 135  # bigger product name
-eng.SUB_RATIO = 0.38  # smaller line under the product name
-eng.FONT_SUB = eng.FONT_TEXT  # Fredoka for the line under the name (name stays Pacifico)
+eng.TEXT_SIZE = 42   # body text, small
+eng.NAME_SIZE = 135  # big product name (Pacifico)
+eng.SUB_RATIO = 0.38  # small line under the product name
+eng.FONT_SUB = eng.FONT_TEXT  # Fredoka for the line under the name
+eng.FONT_POINT = eng.os.path.join(eng.HERE, "fonts", "Mali-Medium.ttf")  # cute, not bold, for ✅ points
+eng.TEXT_TOP = 0.12
 
 # Body text is copied word-for-word from the reference video (only line breaks
-# differ so every line fits; "✨" bullets shown as ✅). Hook and the
-# "Tekan beg kuning" line follow the brief. Dropped: "1 titis = 15 biji telur"
-# (not on the packaging, can't be proven for TikTok ads review).
-# Shots follow the reference: only the sofa footage (A, B) plus the
-# drop-into-milk shot from C, reused where the reference shows the cup.
+# differ; "✨" bullets shown as ✅). Hook and the "Tekan beg kuning" line follow
+# the brief. Dropped: "1 titis = 15 biji telur" (not on the packaging).
+# Shots: sofa footage (A, B) plus the drop-into-milk shot from C (hook only).
+# Every text block sits above the product: text_top is set per shot so the
+# block ends before the top of the bottle/box.
 eng.SCENES = [
-    dict(  # HOOK 1/2 - dropper moving over the milk
-        src="C", t_in=26.2, t_out=28.0, speed=1.2,
+    dict(  # HOOK 1/2 - bottle front on the sofa (cap starts ~30% down)
+        src="B", t_in=37.0, t_out=38.8, speed=1.2,
         lines=[
             ("Anak susah makan &", 0.05, "text"),
             ("jarang kena matahari? 😩", 0.05, "text"),
         ],
     ),
-    dict(  # HOOK 2/2 - the drop falling into the milk
-        src="C", t_in=28.0, t_out=29.8, speed=1.2,
+    dict(  # HOOK 2/2 - the drop falling into the milk; one line between dropper and cup
+        src="C", t_in=28.0, t_out=29.8, speed=1.2, text_top=0.275,
         lines=[
-            ("Vitamin D3 setitis ni", 0.03, "text"),
-            ("WAJIB ada! 🛒✨", 0.03, "text"),
+            ("Vitamin D3 setitis ni WAJIB ada! 🛒✨", 0.03, "text"),
         ],
     ),
-    dict(  # ref 0-2.4s: drop into the cup
-        src="C", t_in=26.6, t_out=29.8, speed=1.2,
+    dict(  # bottle turning to the side label
+        src="B", t_in=15.0, t_out=18.0, speed=1.2, text_top=0.075,
         lines=[
             ("1 titik, besar manfaatnya 🤍", 0.05, "text"),
             ("Mummy dah masukkan Vitamin D3", 0.6, "text"),
             ("dalam rutin harian anak belum? 👀", 0.6, "text"),
         ],
     ),
-    dict(  # ref 2.5-4s: title card over the product (white flash)
-        src="B", t_in=0.5, t_out=4.5, speed=1.2, flash=True, text_top=0.10,
+    dict(  # title card over the bottle front (white flash)
+        src="B", t_in=0.5, t_out=4.5, speed=1.2, flash=True, text_top=0.025,
         lines=[
             ("Kids Ddrops", 0.1, "name"),
             ("Vitamin D3", 0.9, "sub"),
         ],
     ),
-    dict(  # ref 4-7s: box in hand, turning to the back
-        src="A", t_in=23.0, t_out=28.5, speed=1.2,
+    dict(  # bottle side label, turning
+        src="B", t_in=18.0, t_out=21.5, speed=1.2, text_top=0.075,
         lines=[
             ("Vitamin D ni bagus untuk", 0.08, "text"),
             ("perkembangan anak terutama", 0.08, "text"),
             ("untuk baby yang Fully Direct feed", 0.08, "text"),
         ],
     ),
-    dict(  # ref 7-9.5s: box front close-up (600 IU)
-        src="A", t_in=11.0, t_out=16.0, speed=1.2,
+    dict(  # bottle front: 600 IU
+        src="B", t_in=39.0, t_out=42.6, speed=1.1,
         lines=[
             ("Pilih ikut umur anak", 0.08, "text"),
             ("Yang ni 600IU sesuai anak", 0.7, "text"),
             ("umur 1-18 tahun", 0.7, "text"),
         ],
     ),
-    dict(  # ref 9.5-15s: holding the bottle
-        src="B", t_in=0.5, t_out=9.5, speed=2.0,
+    dict(  # bottle lying in the hand (supplement facts), lots of headroom
+        src="B", t_in=25.0, t_out=33.5, speed=2.0, text_top=0.11,
         lines=[
             ("Boleh tambah dalam rutin harian kalau", 0.05, "text"),
             ("anak ada situasi macam ni :", 0.05, "text"),
@@ -97,16 +98,16 @@ eng.SCENES = [
             ("✅ Kerap sakit", 2.25, "check"),
         ],
     ),
-    dict(  # ref 15-17.5s: holding the bottle
-        src="B", t_in=36.0, t_out=39.6, speed=1.2,
+    dict(  # bottle side label
+        src="B", t_in=11.0, t_out=15.0, speed=1.2,
         lines=[
             ("cukup 1 titis sehari je", 0.08, "text"),
             ("banyak manfaat", 0.08, "text"),
         ],
         sfx=[(0.6, "ding", 0.45)],
     ),
-    dict(  # ref 17.5-20s: drop into the milk
-        src="C", t_in=25.4, t_out=29.8, speed=1.2,
+    dict(  # bottle lying in the hand
+        src="B", t_in=21.5, t_out=25.0, speed=1.2,
         lines=[
             ("Cara guna :", 0.05, "text"),
             ("✅ Titiskan dalam susu", 0.6, "check"),
@@ -114,8 +115,8 @@ eng.SCENES = [
             ("✅ Guna sudu", 1.8, "check"),
         ],
     ),
-    dict(  # ref 20-24s: box back panel
-        src="A", t_in=32.0, t_out=42.5, speed=2.5,
+    dict(  # bottle coming into frame, low in the shot
+        src="B", t_in=35.6, t_out=39.1, speed=1.2, text_top=0.07,
         lines=[
             ("Vitamin D bagus", 0.05, "text"),
             ("✅ Menyokong perkembangan", 0.6, "check"),
@@ -124,16 +125,16 @@ eng.SCENES = [
             ("✅ Menyokong fungsi sistem imun", 1.9, "check"),
         ],
     ),
-    dict(  # ref 24-27s: product shot (box front, "100 drops")
-        src="A", t_in=2.0, t_out=6.6, speed=1.2,
+    dict(  # bottle front
+        src="B", t_in=5.0, t_out=9.5, speed=1.2, text_top=0.06,
         lines=[
             ("satu botol tahan sampai 3 bulan!", 0.08, "text"),
             ("Jadi memang berbaloi untuk", 0.08, "text"),
             ("dijadikan rutin harian anak ✨", 0.08, "text"),
         ],
     ),
-    dict(  # CTA, text only
-        src="B", t_in=39.4, t_out=42.6, speed=1.1,
+    dict(  # CTA, text only - box front
+        src="A", t_in=2.5, t_out=6.5, speed=1.2, text_top=0.04,
         lines=[
             ("Order Now Mummy ! 🛒💛", 0.08, "cta"),
             ("Tekan beg kuning & checkout sekarang!", 0.08, "cta"),

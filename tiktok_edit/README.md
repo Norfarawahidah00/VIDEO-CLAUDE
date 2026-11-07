@@ -12,7 +12,7 @@ python3 avco_edit.py --src "/path/to/AVCO 1" --out final.mp4               # 108
 
 - `avco_edit.py` – scene list (EDL), text/animation and render
 - `sfx.py` – pop, bubble, tick, sparkle, ding, whoosh, pen, shimmer, kaching (numpy synth)
-- `fonts/` – Fredoka SemiBold, Pacifico (SIL Open Font License, Google Fonts)
+- `fonts/` – Fredoka SemiBold, Pacifico, Mali Medium (✅ points in the Ddrops edit) (SIL Open Font License, Google Fonts)
 - Emoji: system Noto Color Emoji (`/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf`)
 
 Body text is copied from the reference video; only the hook and CTA are new.
