@@ -23,7 +23,7 @@ import avco_edit as eng
 eng.CLIPS = {
     "A": "VID20261107102613.mp4",  # box on the sofa: front, back panel, side panel
     "B": "VID20261107102831.mp4",  # bottle in hand on the sofa
-    "C": "VID20261107103027.mp4",  # kitchen: drop into the milk (hook only)
+    "C": "VID20261107103027.mp4",  # kitchen: drop into the milk
 }
 
 eng.MARKER_BLUE = (110, 50, 175, 190)  # Ddrops purple highlighter behind the name
@@ -33,12 +33,19 @@ eng.SUB_RATIO = 0.38  # small line under the product name
 eng.FONT_SUB = eng.FONT_TEXT  # Fredoka for the line under the name
 eng.FONT_POINT = eng.os.path.join(eng.HERE, "fonts", "Mali-Medium.ttf")  # cute, not bold, for ✅ points
 eng.TEXT_TOP = 0.12
+# mini zoom-in at every cut and every new line/point, anchored at the bottom of
+# the text so the product grows downwards and never slides under the text
+eng.PUNCH = 0.0
+eng.STEP_ZOOM = 0.025
+eng.STEP_MAX = 0.08
+eng.ZOOM_AT_TEXT = True
+eng.BASE_MARGIN = 1.12  # decode larger so the zoom stays sharp
 
 # Body text is copied word-for-word from the reference video (only line breaks
 # differ; "✨" bullets shown as ✅). Hook and the "Tekan beg kuning" line follow
 # the brief. Dropped: "1 titis = 15 biji telur" (not on the packaging).
 # Shots: sofa footage (box A, bottle B) matched to the text, plus the
-# drop-into-milk shot from C (hook only).
+# drop-into-milk shot from C (hook and "Cara guna").
 # Every text block sits above the product: text_top is set per shot so the
 # block ends before the top of the bottle/box.
 eng.SCENES = [
@@ -55,8 +62,8 @@ eng.SCENES = [
             ("Vitamin D3 setitis ni WAJIB ada! 🛒✨", 0.03, "text"),
         ],
     ),
-    dict(  # bottle turning to the side label
-        src="B", t_in=15.0, t_out=18.0, speed=1.2, text_top=0.075,
+    dict(  # box front: "Helps support bone development and immune function" (box top ~11%)
+        src="A", t_in=6.0, t_out=9.8, speed=1.2, text_top=0.025,
         lines=[
             ("1 titik, besar manfaatnya 🤍", 0.05, "text"),
             ("Mummy dah masukkan Vitamin D3", 0.6, "text"),
@@ -78,8 +85,8 @@ eng.SCENES = [
             ("untuk baby yang Fully Direct feed", 0.08, "text"),
         ],
     ),
-    dict(  # box front: 600 IU, for ages 1 year+ (box top ~11%)
-        src="A", t_in=3.5, t_out=6.8, speed=1.2, text_top=0.04,
+    dict(  # box front: 600 IU, for ages 1 year+ (box top ~10%)
+        src="A", t_in=3.0, t_out=6.0, speed=1.1, text_top=0.035,
         lines=[
             ("Pilih ikut umur anak", 0.08, "text"),
             ("Yang ni 600IU sesuai anak umur 1-18 tahun", 0.7, "text"),
@@ -106,8 +113,8 @@ eng.SCENES = [
         ],
         sfx=[(0.6, "ding", 0.45)],
     ),
-    dict(  # box side panel: Directions (box top ~16-18%)
-        src="A", t_in=60.5, t_out=65.5, speed=1.2, text_top=0.05,
+    dict(  # drop into the milk; text sits between the dropper tip and the cup
+        src="C", t_in=25.4, t_out=29.8, speed=1.2, text_top=0.27,
         lines=[
             ("Cara guna :", 0.05, "text"),
             ("✅ Titiskan dalam susu", 0.6, "check"),
@@ -132,8 +139,8 @@ eng.SCENES = [
             ("dijadikan rutin harian anak ✨", 0.08, "text"),
         ],
     ),
-    dict(  # CTA, text only - box front (box top ~11%)
-        src="A", t_in=6.8, t_out=9.8, speed=1.1, text_top=0.04,
+    dict(  # CTA, text only - bottle front (cap ~20-25%)
+        src="B", t_in=39.0, t_out=42.6, speed=1.1,
         lines=[
             ("Order Now Mummy ! 🛒💛", 0.08, "cta"),
             ("Tekan beg kuning & checkout sekarang!", 0.08, "cta"),

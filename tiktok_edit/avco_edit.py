@@ -145,6 +145,10 @@ BASE_MARGIN = 1.08        # decode slightly larger so push-ins stay sharp
 PUSH = 0.03               # slow push-in across a scene
 PUNCH = 0.035             # small punch-in at each cut
 PUNCH_DUR = 0.22
+STEP_ZOOM = 0.0           # mini zoom-in each time a text line/point appears (0 = off)
+STEP_MAX = 0.08           # cap on the summed step zoom in one scene
+STEP_DUR = 0.25
+ZOOM_AT_TEXT = False      # anchor zoom at the bottom of the text block (keeps product below text)
 
 EMOJI_RE = re.compile(
     "([\U0001F000-\U0001FAFF☀-➿⬀-⯿⌀-⏿]"
@@ -322,6 +326,10 @@ class Overlay:
                 im = kit.line(text, kit.point_font if kind == "check" else None)
                 self.items.append(dict(kind=kind, t0=t0, im=im, cy=y + im.height / 2))
                 y += kit.size * LINE_GAP
+        # bottom of the text block (fraction of H) and the times new lines appear
+        self.bottom = max((it["cy"] + (it["txt"] if "txt" in it else it["im"]).height / 2)
+                          for it in self.items) / H if self.items else 0.5
+        self.steps = sorted({0.0} | {round(it["t0"], 2) for it in self.items})
 
     def draw(self, frame, t):
         cx = self.W / 2
@@ -512,9 +520,14 @@ def main():
         for fi, base in enumerate(scene_frames(path, sc, BW, BH)):
             t = fi / FPS
             z = 1 + PUSH * (t / dur) + PUNCH * (1 - ease_out(min(t / PUNCH_DUR, 1)))
+            if STEP_ZOOM:
+                step = min(STEP_ZOOM, STEP_MAX / len(ov.steps))
+                z += sum(step * ease_out(min(max((t - tp) / STEP_DUR, 0), 1)) for tp in ov.steps)
             # z == 1 shows the whole source frame (no extra zoom)
             cw, ch = BW / z, BH / z
-            box = ((BW - cw) / 2, (BH - ch) / 2, (BW + cw) / 2, (BH + ch) / 2)
+            ay = min(ov.bottom, 0.5) if ZOOM_AT_TEXT else 0.5
+            top = ay * (BH - ch)
+            box = ((BW - cw) / 2, top, (BW + cw) / 2, top + ch)
             frame = base.resize((W, H), Image.BICUBIC, box=box).convert("RGBA")
             ov.draw(frame, t)
             if sc.get("flash") and t < 0.25:
