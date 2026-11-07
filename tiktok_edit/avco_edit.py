@@ -272,6 +272,10 @@ def ease_out(x):
     return 1 - (1 - x) ** 3
 
 
+def ease_in_out(x):
+    return 0.5 - 0.5 * math.cos(math.pi * x)
+
+
 def paste_scaled(frame, im, cx, cy, s, alpha):
     if s <= 0.01 or alpha <= 0:
         return
@@ -522,7 +526,7 @@ def main():
             z = 1 + PUSH * (t / dur) + PUNCH * (1 - ease_out(min(t / PUNCH_DUR, 1)))
             if STEP_ZOOM:
                 step = min(STEP_ZOOM, STEP_MAX / len(ov.steps))
-                z += sum(step * ease_out(min(max((t - tp) / STEP_DUR, 0), 1)) for tp in ov.steps)
+                z += sum(step * ease_in_out(min(max((t - tp) / STEP_DUR, 0), 1)) for tp in ov.steps)
             # z == 1 shows the whole source frame (no extra zoom)
             cw, ch = BW / z, BH / z
             ay = min(ov.bottom, 0.5) if ZOOM_AT_TEXT else 0.5

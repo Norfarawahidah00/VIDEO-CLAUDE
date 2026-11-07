@@ -36,7 +36,9 @@ eng.TEXT_TOP = 0.12
 # mini zoom-in at every cut and every new line/point, anchored at the bottom of
 # the text so the product grows downwards and never slides under the text
 eng.PUNCH = 0.0
-eng.STEP_ZOOM = 0.025
+eng.STEP_ZOOM = 0.02
+eng.STEP_DUR = 0.8   # slow ease in/out so the steps blend into one smooth push
+eng.PUSH = 0.04      # continuous slow push-in underneath, so the motion never stops
 eng.STEP_MAX = 0.08
 eng.ZOOM_AT_TEXT = True
 eng.BASE_MARGIN = 1.12  # decode larger so the zoom stays sharp
