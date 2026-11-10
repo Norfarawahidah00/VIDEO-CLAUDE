@@ -16,3 +16,14 @@ python3 avco_edit.py --src "/path/to/AVCO 1" --out final.mp4               # 108
 - Emoji: system Noto Color Emoji (`/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf`)
 
 Body text is copied from the reference video; only the hook and CTA are new.
+
+## Hana Femme Intimate Cleanser
+
+```
+python3 hanafemme_edit.py --src "/path/to/raw clips" --out preview.mp4 --preview   # 540x960
+python3 hanafemme_edit.py --src "/path/to/raw clips" --out final.mp4               # 1080x1920
+```
+
+- `hanafemme_edit.py` – scene list, text and render (same engine as the AVCO edit)
+- Wording follows the reference; claims not printed on the packaging were swapped
+  for ones that are (gentle formula, lasting freshness, helps maintain pH balance).
