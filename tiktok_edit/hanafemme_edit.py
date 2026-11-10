@@ -43,7 +43,10 @@ CLIPS = {
 
 # ---------------------------------------------------------------------------
 # Edit decision list. Times are seconds in the source clip; text times are
-# seconds from the start of the scene. Every scene is < 10 s.
+# seconds from the start of the scene. Every scene is < 10 s. `track` = where the
+# product sits in the source frame at points u (0..1) of the scene: (u, centre x,
+# top y, bottom y) as fractions; the crop follows it so the product stays centred
+# and below the text.
 # Body wording follows the reference video. Lines whose claim is not printed on
 # the packaging were swapped for claims that are:
 #   box:    "gentle formula cleanses and cares for intimate areas ... providing
@@ -56,13 +59,15 @@ CLIPS = {
 SCENES = [
     dict(  # HOOK 1/2 - foam coming out of the pump (pain point)
         src="A", t_in=105.0, t_out=107.4, speed=1.5,
+        track=[(0, 0.55, 0.25, 0.42), (0.33, 0.47, 0.27, 0.4), (0.66, 0.55, 0.2, 0.4), (1, 0.55, 0.2, 0.38)],
         lines=[
-            ("Cik Bunga rasa tak fresh", 0.03, "text"),
-            ("& tak selesa? 😩", 0.03, "text"),
+            ("Dah mandi pun Cik Bunga", 0.03, "text"),
+            ("MASIH rasa tak fresh? 😩", 0.03, "text"),
         ],
     ),
     dict(  # HOOK 2/2 - foam on the palm (product)
         src="A", t_in=108.3, t_out=110.4, speed=1.4,
+        track=[(0, 0.4, 0.27, 0.48), (0.33, 0.45, 0.3, 0.52), (0.66, 0.5, 0.3, 0.5), (1, 0.55, 0.32, 0.54)],
         lines=[
             ("Intimate mousse ni", 0.03, "text"),
             ("WAJIB ada! 🛒✨", 0.03, "text"),
@@ -70,6 +75,7 @@ SCENES = [
     ),
     dict(  # product name over the box + bottle front labels, flash after the hook
         src="C", t_in=8.6, t_out=12.6, speed=1.2, flash=True,
+        track=[(0, 0.5, 0.17, 0.95)], max_zoom=1.0, text_top=0.035,
         lines=[
             ("Hana Femme", 0.1, "name"),
             ("Intimate Cleanser", 1.0, "sub"),
@@ -77,14 +83,16 @@ SCENES = [
     ),
     dict(  # bottle front, one hand (reference line 1)
         src="B", t_in=1.0, t_out=4.6, speed=1.3,
+        track=[(0, 0.32, 0.13, 0.69), (0.33, 0.36, 0.13, 0.67), (0.66, 0.45, 0.16, 0.66), (1, 0.55, 0.12, 0.65)],
         lines=[
             ("Nak Cik Bunga rasa lebih", 0.05, "text"),
             ("bersih & selesa?", 0.05, "text"),
             ("Jangan skip step ni 🫧", 0.9, "text"),
         ],
     ),
-    dict(  # unboxing (reference line 2)
-        src="A", t_in=33.5, t_out=41.5, speed=2.0,
+    dict(  # bottle pulled out of the box (reference line 2)
+        src="A", t_in=40.3, t_out=44.3, speed=1.2,
+        track=[(0, 0.4, 0.3, 1.0), (0.33, 0.38, 0.0, 0.95), (0.66, 0.4, 0.0, 0.5), (1, 0.37, 0.03, 0.65)],
         lines=[
             ("Intimate pun perlukan", 0.05, "text"),
             ("self-care juga tau.", 0.05, "text"),
@@ -94,6 +102,7 @@ SCENES = [
     ),
     dict(  # bottle front label close-up (ingredients printed on it)
         src="A", t_in=115.2, t_out=120.0, speed=1.4,
+        track=[(0, 0.7, 0.08, 0.9), (0.33, 0.45, 0.0, 0.95), (0.66, 0.4, 0.0, 0.95), (1, 0.42, 0.05, 0.85)], max_zoom=1.1,
         lines=[
             ("Diperkaya Vitamin E, Chamomile,", 0.05, "text"),
             ("Probiotik, Niacinamide &", 0.05, "text"),
@@ -102,6 +111,7 @@ SCENES = [
     ),
     dict(  # back label (reference checklist, claims matched to packaging)
         src="B", t_in=23.0, t_out=35.0, speed=2.0,
+        track=[(0, 0.3, 0.17, 0.75), (0.33, 0.4, 0.17, 0.75), (0.66, 0.33, 0.18, 0.75), (1, 0.33, 0.18, 0.72)],
         lines=[
             ("✅ Formula lembut untuk kawasan intim", 0.1, "check"),
             ("✅ Rasa segar & selesa lebih lama 🤍", 0.75, "check"),
@@ -111,6 +121,7 @@ SCENES = [
     ),
     dict(  # foam texture on the palm
         src="A", t_in=110.6, t_out=114.6, speed=1.5,
+        track=[(0, 0.45, 0.32, 0.55), (0.33, 0.42, 0.35, 0.58), (0.66, 0.42, 0.38, 0.6), (1, 0.42, 0.4, 0.6)],
         lines=[
             ("Tekstur mousse lembut,", 0.05, "text"),
             ("2-3 pam je dah cukup ✨", 0.05, "text"),
@@ -118,6 +129,7 @@ SCENES = [
     ),
     dict(  # bottle turning back to the front (reference CTA line)
         src="B", t_in=44.6, t_out=49.6, speed=1.5,
+        track=[(0, 0.35, 0.22, 0.78), (0.33, 0.38, 0.18, 0.75), (0.66, 0.36, 0.17, 0.75), (1, 0.37, 0.17, 0.73)],
         lines=[
             ("Nak tambah dalam", 0.05, "text"),
             ("self-care routine? 🫶", 0.05, "text"),
@@ -126,6 +138,7 @@ SCENES = [
     ),
     dict(  # CTA 1/2 - box front
         src="A", t_in=20.6, t_out=25.1, speed=1.5,
+        track=[(0, 0.5, 0.15, 0.88), (0.33, 0.55, 0.12, 0.87), (0.66, 0.55, 0.12, 0.87), (1, 0.6, 0.12, 0.87)], max_zoom=1.15,
         lines=[
             ("Jangan tunggu Cik Bunga", 0.05, "text"),
             ("rasa tak selesa dulu 😭", 0.05, "text"),
@@ -134,6 +147,7 @@ SCENES = [
     ),
     dict(  # CTA 2/2, text only
         src="C", t_in=21.5, t_out=26.0, speed=1.2,
+        track=[(0, 0.5, 0.2, 0.95)], max_zoom=1.05,
         lines=[
             ("Tekan beg kuning &", 0.08, "cta"),
             ("checkout sekarang! 🛒💛", 0.08, "cta"),
@@ -142,8 +156,8 @@ SCENES = [
 ]
 
 # layout (fractions of the 1080x1920 frame; scaled for preview)
-TEXT_TOP = 0.185          # block starts ~18.5% from top
-TEXT_SIZE = 60            # Fredoka px at 1080 wide (max; one size for all lines)
+TEXT_TOP = 0.08           # block starts ~8% from top, above the product
+TEXT_SIZE = 40            # Fredoka px at 1080 wide (max; one size for all lines)
 NAME_SIZE = 96            # Pacifico px at 1080 wide (max; one size for all rows)
 MAX_TEXT_W = 0.88         # longest line must fit within 88% of the width
 LINE_GAP = 1.06           # tight line spacing
@@ -152,6 +166,8 @@ BASE_MARGIN = 1.08        # decode slightly larger so push-ins stay sharp
 PUSH = 0.03               # slow push-in across a scene
 PUNCH = 0.035             # small punch-in at each cut
 PUNCH_DUR = 0.22
+PRODUCT_Y = 0.55          # product centre height in the frame (pushed lower if text needs room)
+MAX_ZOOM = 1.6            # most a scene is cropped in to centre the product (4K source stays > 1080p)
 
 EMOJI_RE = re.compile(
     "([\U0001F000-\U0001FAFF☀-➿⬀-⯿⌀-⏿]"
@@ -328,6 +344,7 @@ class Overlay:
                 im = kit.line(text)
                 self.items.append(dict(kind=kind, t0=t0, im=im, cy=y + im.height / 2))
                 y += kit.size * LINE_GAP
+        self.bottom = y + (kit.size * 0.45 if self.items and self.items[-1]["kind"] not in ("name", "sub") else 0)
 
     def draw(self, frame, t):
         cx = self.W / 2
@@ -390,8 +407,50 @@ class Overlay:
 # ---------------------------------------------------------------------------
 # video
 # ---------------------------------------------------------------------------
+def place(z, x, yt, yb, clear):
+    """Crop window (left, top, size as fractions of the source) at zoom z that puts the
+    product (centre x, top yt, bottom yb) horizontally centred and vertically around
+    PRODUCT_Y, but never with its top above `clear` (the bottom of the text block)."""
+    w = 1 / z
+    left = min(max(x - w / 2, 0), 1 - w)
+    want = max(PRODUCT_Y, clear + 0.03 + (yb - yt) * z / 2)  # product centre in the frame
+    top = min(max((yt + yb) / 2 - want * w, 0), 1 - w)
+    return left, top, w
+
+
+def framing(sc, clear):
+    """Pick the crop zoom for a scene and return (zoom, u -> product box).
+
+    `track` lists (u, x, top, bottom): the product's centre and vertical extent in the
+    source frame at point u (0..1) of the scene. The zoom (1..max_zoom) is chosen to best
+    centre the product while keeping it below the text and inside the frame."""
+    track = sc.get("track", [(0, 0.5, 0.3, 0.9)])
+    zmax = sc.get("max_zoom", MAX_ZOOM)
+
+    def cost(z):
+        c = 0.15 * (z - 1)
+        for _, x, yt, yb in track:
+            left, top, w = place(z, x, yt, yb, clear)
+            c += (abs((x - left) / w - 0.5) + 3 * max(0, clear + 0.01 - (yt - top) / w)
+                  + 2 * max(0, (yb - top) / w - 0.98)) / len(track)
+        return c
+    zs = [1 + k * 0.02 for k in range(int((zmax - 1) / 0.02) + 1)]
+    zoom = min(zs, key=cost)
+
+    def pos(u):
+        if u <= track[0][0]:
+            return track[0][1:]
+        for a, b in zip(track, track[1:]):
+            if u <= b[0]:
+                k = (u - a[0]) / max(b[0] - a[0], 1e-6)
+                k = k * k * (3 - 2 * k)  # smoothstep so the crop eases between points
+                return tuple(p + (q - p) * k for p, q in zip(a[1:], b[1:]))
+        return track[-1][1:]
+    return zoom, pos
+
+
 def scene_frames(path, sc, BW, BH):
-    """Yield RGB frames (BW x BH) for a scene, decoded from the original clip."""
+    """Yield RGB frames (BW x BH, whole 9:16 source frame) for a scene, decoded from the original clip."""
     dur_out = (sc["t_out"] - sc["t_in"]) / sc["speed"]
     n = round(dur_out * FPS)
     probe = subprocess.run(
@@ -402,16 +461,10 @@ def scene_frames(path, sc, BW, BH):
     w, h = int(vals["width"]), int(vals["height"])
     if abs(int(float(vals.get("rotation", 0)))) == 90:
         w, h = h, w
-    # largest 9:16 window (landscape clips get cropped), optionally zoomed in
-    zoom = sc.get("zoom", 1.0)
-    cw0, ch0 = (h * 9 / 16, h) if w / h > 9 / 16 else (w, w * 16 / 9)
-    cw, ch = round(cw0 / zoom / 2) * 2, round(ch0 / zoom / 2) * 2
-    if (cw, ch) != (w, h):
-        x = int(min(max(sc.get("cx", 0.5) * w - cw / 2, 0), w - cw))
-        y = int(min(max(sc.get("cy", 0.5) * h - ch / 2, 0), h - ch))
-        crop = f"crop={cw}:{ch}:{x}:{y},"
-    else:
-        crop = ""
+    # largest centred 9:16 window (the raw clips are already 9:16, so usually none)
+    cw, ch = (h * 9 / 16, h) if w / h > 9 / 16 else (w, w * 16 / 9)
+    cw, ch = round(cw / 2) * 2, round(ch / 2) * 2
+    crop = f"crop={cw}:{ch}," if (cw, ch) != (w, h) else ""
     vf = (f"setpts=(PTS-STARTPTS)/{sc['speed']},fps={FPS},{crop}"
           f"scale={BW}:{BH}:flags=lanczos,format=rgb24")
     cmd = ["ffmpeg", "-v", "error", "-ss", f"{sc['t_in']}", "-t", f"{sc['t_out'] - sc['t_in']}",
@@ -515,12 +568,19 @@ def main():
     for i, (s0, sc, ov) in enumerate(meta):
         dur = (sc["t_out"] - sc["t_in"]) / sc["speed"]
         path = os.path.join(args.src, CLIPS[sc["src"]])
-        for fi, base in enumerate(scene_frames(path, sc, BW, BH)):
+        zoom, pos = framing(sc, ov.bottom / H)
+        # decode big enough that the cropped window is still >= output resolution
+        DW, DH = round(BW * zoom / 2) * 2, round(BH * zoom / 2) * 2
+        print(f"scene {i + 1}: crop zoom {zoom:.2f}", flush=True)
+        for fi, base in enumerate(scene_frames(path, sc, DW, DH)):
             t = fi / FPS
             z = 1 + PUSH * (t / dur) + PUNCH * (1 - ease_out(min(t / PUNCH_DUR, 1)))
-            # z == 1 shows the whole source frame (no extra zoom)
-            cw, ch = BW / z, BH / z
-            box = ((BW - cw) / 2, (BH - ch) / 2, (BW + cw) / 2, (BH + ch) / 2)
+            cw, ch = DW / (zoom * z), DH / (zoom * z)  # zoom 1, z 1 = whole source frame
+            left, top, _ = place(zoom, *pos(t / dur), ov.bottom / H)
+            # push/punch-in zooms around the centre of the product-framed window
+            x0 = (left + 0.5 / zoom) * DW - cw / 2
+            y0 = (top + 0.5 / zoom) * DH - ch / 2
+            box = (x0, y0, x0 + cw, y0 + ch)
             frame = base.resize((W, H), Image.BICUBIC, box=box).convert("RGBA")
             ov.draw(frame, t)
             if sc.get("flash") and t < 0.25:
